@@ -8,6 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useLogin } from "@/hooks/useAuth";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { token } from "@/lib/token";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -17,17 +21,39 @@ const loginSchema = z.object({
 type LoginForm = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
+  const router = useRouter();
+  const { mutate: loginAction, isPending } = useLogin();
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
   });
 
   const onSubmit = async (data: LoginForm) => {
-    console.log("Login payload:", data);
-    // TODO: integrate axios + Laravel Sanctum login
+    loginAction(
+      { email: data.email, password: data.password },
+      {
+        onSuccess: (res) => {
+          const user = res.data.user;
+          const auth_token = res.data.token;
+          if (user.role === "job_seeker") {
+            router.push("/job-seeker/job-listing");
+            token.set(auth_token);
+            return;
+          }
+
+          if (user.role === "employer") {
+            router.push("/employer/dashboard");
+            token.set(auth_token);
+            return;
+          }
+          toast.success("Logged in");
+        },
+        onError: () => toast.error("Invalid credentials"),
+      },
+    );
   };
 
   return (
@@ -59,8 +85,8 @@ export default function LoginPage() {
               )}
             </div>
 
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Logging in..." : "Login"}
+            <Button type="submit" className="w-full" disabled={isPending}>
+              {isPending ? "Logging in..." : "Login"}
             </Button>
 
             <p className="text-center text-sm text-muted-foreground">
