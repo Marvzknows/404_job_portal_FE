@@ -39,14 +39,14 @@ export default function LoginPage() {
           const user = res.data.user;
           const auth_token = res.data.token;
           if (user.role === "job_seeker") {
-            router.push("/job-seeker/job-listing");
             token.set(auth_token);
+            router.push("/job-seeker/job-listing");
             return;
           }
 
           if (user.role === "employer") {
-            router.push("/employer/dashboard");
             token.set(auth_token);
+            router.push("/employer/dashboard");
             return;
           }
           toast.success("Logged in");
