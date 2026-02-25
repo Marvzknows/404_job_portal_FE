@@ -15,9 +15,8 @@ type RegisterForm = {
 };
 
 export const authService = {
-  login: (data: LoginForm) => api.post("/login", data).then((res) => res.data),
-  register: (data: RegisterForm) =>
-    api.post("/register", data).then((res) => res.data),
-  logout: () => api.post("/logout"),
-  me: () => api.get("/me").then((res) => res.data),
+  login: async (data: LoginForm) => await api.post("/login", data),
+  register: async (data: RegisterForm) => await api.post("/register", data),
+  logout: async () => await api.post("/logout"),
+  me: async () => await api.get("/me"),
 };
