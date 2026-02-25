@@ -1,5 +1,6 @@
+"use client";
 import { UserT } from "@/types/auth";
-import { useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { AuthContext } from "./AuthContext";
 
 type AuthProviderTypes = {
@@ -21,4 +22,10 @@ export const AuthProvider = ({ children }: AuthProviderTypes) => {
       {children}
     </AuthContext.Provider>
   );
+};
+
+export const useAuth = () => {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
+  return ctx;
 };
