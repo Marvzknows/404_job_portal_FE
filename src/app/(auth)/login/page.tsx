@@ -40,16 +40,21 @@ export default function LoginPage() {
           const auth_token = res.data.token;
           if (user.role === "job_seeker") {
             token.set(auth_token);
+            localStorage.setItem("user", user);
             router.push("/job-seeker/job-listing");
             return;
           }
 
           if (user.role === "employer") {
             token.set(auth_token);
+            localStorage.setItem("user", user);
             router.push("/employer/dashboard");
             return;
           }
-          toast.success("Logged in");
+
+          token.set(auth_token);
+          localStorage.setItem("user", user);
+          alert("redirecting to admin dashboard");
         },
         onError: () => toast.error("Invalid credentials"),
       },
