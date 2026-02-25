@@ -20,7 +20,7 @@ const registerSchema = z
   .object({
     first_name: z.string().min(1, "First name is required"),
     last_name: z.string().min(1, "Last name is required"),
-    role: z.enum(["employer", "job_seeker", "admin"]),
+    role: z.enum(["employer", "job_seeker"]),
     email: z.string().email("Invalid email address"),
     password: z.string().min(8, "Password must be at least 8 characters"),
     password_confirmation: z.string(),
@@ -85,7 +85,9 @@ export default function RegisterPage() {
               <Label>Role</Label>
               <Select
                 defaultValue="job_seeker"
-                onValueChange={(val) => setValue("role", val as any)}
+                onValueChange={(val) =>
+                  setValue("role", val as "employer" | "job_seeker")
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select role" />
