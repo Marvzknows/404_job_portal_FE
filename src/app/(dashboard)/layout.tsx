@@ -38,5 +38,5 @@ export default function DashboardLayout({
     return <FullPageError onRetry={refetch} />;
   }
 
-  return <div>{children}</div>;
+  return <div className="min-h-screen bg-gray-50 border">{children}</div>;
 }
