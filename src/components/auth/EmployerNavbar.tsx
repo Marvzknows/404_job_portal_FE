@@ -1,10 +1,12 @@
 import { Bell, Building2, LogOut, Settings, User } from "lucide-react";
 import NavLink from "../NavLink";
+import Image from "next/image";
 
 type EmployerNavbarProps = {
   fullName: string;
   userAvatarUrl: string | null;
 };
+
 export default function EmployerNavbar({
   fullName,
   userAvatarUrl,
@@ -27,7 +29,7 @@ export default function EmployerNavbar({
             <span className="text-sm text-gray-500 ml-2">Employer</span>
           </div>
 
-          {/* navlinks */}
+          {/* NavLinks */}
           <div className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => (
               <NavLink key={link.href} href={link.href} label={link.label} />
@@ -47,10 +49,13 @@ export default function EmployerNavbar({
             <button className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg">
               <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
                 {userAvatarUrl ? (
-                  <img
+                  <Image
                     src={userAvatarUrl}
                     alt={fullName}
-                    className="w-full h-full object-cover"
+                    width={32}
+                    height={32}
+                    className="object-cover w-full h-full"
+                    unoptimized
                   />
                 ) : (
                   <User className="w-5 h-5 text-gray-500" />
