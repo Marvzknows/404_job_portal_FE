@@ -15,6 +15,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useRegister } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 const registerSchema = z
   .object({
@@ -33,11 +35,13 @@ const registerSchema = z
 type RegisterForm = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
+  const { mutate: registerAction, isPending } = useRegister();
   const {
     register,
     handleSubmit,
     setValue,
-    formState: { errors, isSubmitting },
+    reset,
+    formState: { errors },
   } = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -46,8 +50,13 @@ export default function RegisterPage() {
   });
 
   const onSubmit = async (data: RegisterForm) => {
-    console.log("Register payload:", data);
-    // TODO: call your Laravel API using axios
+    registerAction(data, {
+      onSuccess: () => {
+        toast.success("Successfully registered");
+        reset();
+      },
+      onError: () => toast.error("Registration failed"),
+    });
   };
 
   return (
@@ -138,8 +147,8 @@ export default function RegisterPage() {
               )}
             </div>
 
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Creating account..." : "Register"}
+            <Button type="submit" className="w-full" disabled={isPending}>
+              {isPending ? "Creating account..." : "Register"}
             </Button>
 
             <p className="text-center text-sm text-muted-foreground">

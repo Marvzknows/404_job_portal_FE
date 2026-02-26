@@ -8,6 +8,12 @@ export const useLogin = () => {
   });
 };
 
+export const useRegister = () => {
+  return useMutation({
+    mutationFn: authService.register,
+  });
+};
+
 export const useMe = () => {
   return useQuery<MeResponseT>({
     queryKey: ["me"],
