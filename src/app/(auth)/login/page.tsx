@@ -12,6 +12,7 @@ import { useLogin } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { token } from "@/lib/token";
+import { useAuth } from "@/context/AuthProvider";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -23,6 +24,7 @@ type LoginForm = z.infer<typeof loginSchema>;
 export default function LoginPage() {
   const router = useRouter();
   const { mutate: loginAction, isPending } = useLogin();
+  const { setToken, setUser } = useAuth();
   const {
     register,
     handleSubmit,
@@ -36,24 +38,25 @@ export default function LoginPage() {
       { email: data.email, password: data.password },
       {
         onSuccess: (res) => {
-          const user = res.data.user;
-          const auth_token = res.data.token;
+          const user = res.user;
+          const auth_token = res.token;
+
+          // persist both context and storage
+          token.set(auth_token);
+          localStorage.setItem("user", JSON.stringify(user));
+          setToken(auth_token);
+          setUser(user);
+
           if (user.role === "job_seeker") {
-            token.set(auth_token);
-            localStorage.setItem("user", JSON.stringify(user));
             router.push("/job-seeker/job-listing");
             return;
           }
 
           if (user.role === "employer") {
-            token.set(auth_token);
-            localStorage.setItem("user", JSON.stringify(user));
             router.push("/employer/dashboard");
             return;
           }
 
-          token.set(auth_token);
-          localStorage.setItem("user", JSON.stringify(user));
           alert("redirecting to admin dashboard");
         },
         onError: () => toast.error("Invalid credentials"),

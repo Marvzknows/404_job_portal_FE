@@ -1,9 +1,10 @@
 "use client";
 
+import { useAuth } from "@/context/AuthProvider";
 import { token } from "@/lib/token";
 import { UserT } from "@/types/auth";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 type AuthGuardProps = {
   allowedRole?: string[];
@@ -12,7 +13,9 @@ type AuthGuardProps = {
 
 const AuthGuard = ({ allowedRole, children }: AuthGuardProps) => {
   const router = useRouter();
-
+  const pathname = usePathname();
+  const a = useAuth();
+  console.log(a);
   useEffect(() => {
     // Run only in browser
     const storedToken = token.get();
@@ -28,7 +31,7 @@ const AuthGuard = ({ allowedRole, children }: AuthGuardProps) => {
       router.replace("/login"); // or "/403"
       return;
     }
-  }, [allowedRole, router]);
+  }, [allowedRole, router, pathname]);
 
   return <>{children}</>;
 };

@@ -1,4 +1,5 @@
 import api from "@/lib/axios";
+import { MeResponseT, UserT } from "@/types/auth";
 
 type LoginForm = {
   email: string;
@@ -15,8 +16,23 @@ type RegisterForm = {
 };
 
 export const authService = {
-  login: async (data: LoginForm) => await api.post("/login", data),
-  register: async (data: RegisterForm) => await api.post("/register", data),
-  logout: async () => await api.post("/logout"),
-  me: async () => await api.get("/me"),
+  login: async (data: LoginForm) => {
+    const res = await api.post("/login", data);
+    return res.data;
+  },
+
+  register: async (data: RegisterForm) => {
+    const res = await api.post("/register", data);
+    return res.data;
+  },
+
+  logout: async () => {
+    const res = await api.post("/logout");
+    return res.data;
+  },
+
+  me: async (): Promise<MeResponseT> => {
+    const res = await api.get<MeResponseT>("/me");
+    return res.data;
+  },
 };

@@ -1,4 +1,5 @@
 import { authService } from "@/services/auth.service";
+import { MeResponseT } from "@/types/auth";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 export const useLogin = () => {
@@ -8,7 +9,7 @@ export const useLogin = () => {
 };
 
 export const useMe = () => {
-  return useQuery({
+  return useQuery<MeResponseT>({
     queryKey: ["me"],
     queryFn: authService.me,
   });

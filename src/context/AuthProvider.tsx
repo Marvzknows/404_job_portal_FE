@@ -1,20 +1,28 @@
 "use client";
-import { UserT } from "@/types/auth";
 import { useContext, useState } from "react";
 import { AuthContext } from "./AuthContext";
+import { useMe } from "@/hooks/useAuth";
+import { UserT } from "@/types/auth";
+import { JobSeekerProfileT } from "@/types/JobSeeker";
+import { EmployerProfileT } from "@/types/Employer";
 
 type AuthProviderTypes = {
   children: React.ReactNode;
 };
 export const AuthProvider = ({ children }: AuthProviderTypes) => {
-  const [user, setUser] = useState<UserT | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [user, setUser] = useState<UserT | null>(null);
+  const [profile, setProfile] = useState<
+    EmployerProfileT | JobSeekerProfileT | null
+  >(null);
 
   return (
     <AuthContext.Provider
       value={{
-        user,
+        user: user ?? null,
+        profile: profile ?? null,
         setUser,
+        setProfile,
         token,
         setToken,
       }}
