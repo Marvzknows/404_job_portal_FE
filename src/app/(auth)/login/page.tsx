@@ -8,6 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useLogin } from "@/hooks/useAuth";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { token } from "@/lib/token";
+import { useAuth } from "@/context/AuthProvider";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -17,17 +22,46 @@ const loginSchema = z.object({
 type LoginForm = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
+  const router = useRouter();
+  const { mutate: loginAction, isPending } = useLogin();
+  const { setToken, setUser } = useAuth();
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
   });
 
   const onSubmit = async (data: LoginForm) => {
-    console.log("Login payload:", data);
-    // TODO: integrate axios + Laravel Sanctum login
+    loginAction(
+      { email: data.email, password: data.password },
+      {
+        onSuccess: (res) => {
+          const user = res.user;
+          const auth_token = res.token;
+
+          // persist both context and storage
+          token.set(auth_token);
+          localStorage.setItem("user", JSON.stringify(user));
+          setToken(auth_token);
+          setUser(user);
+
+          if (user.role === "job_seeker") {
+            router.push("/job-seeker/job-listing");
+            return;
+          }
+
+          if (user.role === "employer") {
+            router.push("/employer/dashboard");
+            return;
+          }
+
+          alert("redirecting to admin dashboard");
+        },
+        onError: () => toast.error("Invalid credentials"),
+      },
+    );
   };
 
   return (
@@ -59,8 +93,8 @@ export default function LoginPage() {
               )}
             </div>
 
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Logging in..." : "Login"}
+            <Button type="submit" className="w-full" disabled={isPending}>
+              {isPending ? "Logging in..." : "Login"}
             </Button>
 
             <p className="text-center text-sm text-muted-foreground">
