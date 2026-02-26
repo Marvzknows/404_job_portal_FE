@@ -1,7 +1,6 @@
 "use client";
 import { useContext, useState } from "react";
 import { AuthContext } from "./AuthContext";
-import { useMe } from "@/hooks/useAuth";
 import { UserT } from "@/types/auth";
 import { JobSeekerProfileT } from "@/types/JobSeeker";
 import { EmployerProfileT } from "@/types/Employer";

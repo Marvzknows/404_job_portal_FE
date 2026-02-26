@@ -1,5 +1,5 @@
 import api from "@/lib/axios";
-import { MeResponseT, UserT } from "@/types/auth";
+import { MeResponseT } from "@/types/auth";
 
 type LoginForm = {
   email: string;

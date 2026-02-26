@@ -17,17 +17,18 @@ export default function DashboardLayout({
   const { data: userData, isFetching, error, refetch } = useMe();
   const router = useRouter();
 
-  if (!token.get) {
-    router.replace("/login");
-    return;
-  }
+  useEffect(() => {
+    if (!token.get()) {
+      router.replace("/login");
+    }
+  }, [router]);
 
   useEffect(() => {
     if (userData) {
       setUser(userData.data.user ?? null);
       setProfile(userData.data.profile ?? null);
     }
-  }, [userData]);
+  }, [userData, setProfile, setUser]);
 
   if (isFetching) {
     return <FullPageLoader />;
