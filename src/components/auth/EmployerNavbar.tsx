@@ -77,6 +77,15 @@ export default function EmployerNavbar({
               </span>
             </button>
 
+            <div className="hidden sm:block h-6 w-px bg-gray-300 mx-1" />
+
+            <button className="hidden sm:flex items-center gap-1.5 px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+              <LogOut className="w-4 h-4" />
+              <span className="text-sm font-medium hidden lg:block">
+                Logout
+              </span>
+            </button>
+
             {/* Mobile Toggle */}
             <button
               className="md:hidden p-2 hover:bg-gray-100 rounded-lg"
