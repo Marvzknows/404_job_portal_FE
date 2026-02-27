@@ -1,3 +1,4 @@
+import EmployerJobApplicationSearchFilter from "@/components/Employer/JobApplication/EmployerJobApplicationSearchFilter";
 import PageHeader from "@/components/PageHeader";
 
 const EmployerApplicationsPage = () => {
@@ -7,6 +8,8 @@ const EmployerApplicationsPage = () => {
         headerTitle="Applications"
         subHeaderTitle="Review and manage candidate applications"
       />
+
+      <EmployerJobApplicationSearchFilter />
     </div>
   );
 };
