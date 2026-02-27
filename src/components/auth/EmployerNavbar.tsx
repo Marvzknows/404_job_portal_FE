@@ -1,6 +1,10 @@
-import { Bell, Building2, LogOut, Settings, User } from "lucide-react";
+"use client";
+
+import { useState } from "react";
+import { Bell, Building2, LogOut, Menu, Settings, User, X } from "lucide-react";
 import NavLink from "../NavLink";
 import Image from "next/image";
+import Link from "next/link";
 
 type EmployerNavbarProps = {
   fullName: string;
@@ -11,6 +15,8 @@ export default function EmployerNavbar({
   fullName,
   userAvatarUrl,
 }: EmployerNavbarProps) {
+  const [open, setOpen] = useState(false);
+
   const navLinks = [
     { href: "/employer/dashboard", label: "Dashboard" },
     { href: "/employer/job-listing", label: "My Jobs" },
@@ -23,30 +29,35 @@ export default function EmployerNavbar({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <div className="flex items-center gap-3">
+          <Link href="/employer/dashboard" className="flex items-center gap-3">
             <Building2 className="w-8 h-8 text-violet-600" />
             <span className="text-xl font-bold text-gray-900">JobPortal</span>
-            <span className="text-sm text-gray-500 ml-2">Employer</span>
-          </div>
+            <span className="text-sm text-gray-500 ml-2 hidden sm:block">
+              Employer
+            </span>
+          </Link>
 
-          {/* NavLinks */}
+          {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => (
               <NavLink key={link.href} href={link.href} label={link.label} />
             ))}
           </div>
 
-          {/* Auth */}
+          {/* Right Actions */}
           <div className="flex items-center gap-2">
             <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg relative">
               <Bell className="w-5 h-5" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
-            <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+
+            <button className="hidden sm:flex p-2 text-gray-600 hover:bg-gray-100 rounded-lg">
               <Settings className="w-5 h-5" />
             </button>
-            <div className="h-6 w-px bg-gray-300 mx-2"></div>
-            <button className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg">
+
+            <div className="hidden sm:block h-6 w-px bg-gray-300 mx-2" />
+
+            <button className="hidden sm:flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg">
               <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
                 {userAvatarUrl ? (
                   <Image
@@ -65,12 +76,69 @@ export default function EmployerNavbar({
                 {fullName}
               </span>
             </button>
-            <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg">
-              <LogOut className="w-5 h-5" />
+
+            {/* Mobile Toggle */}
+            <button
+              className="md:hidden p-2 hover:bg-gray-100 rounded-lg"
+              onClick={() => setOpen((prev) => !prev)}
+            >
+              {open ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
       </div>
+
+      {/* Mobile Menu */}
+      {open && (
+        <div className="md:hidden border-t border-gray-200 bg-white">
+          <div className="px-4 py-4 space-y-3">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setOpen(false)}
+                className="block px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100"
+              >
+                {link.label}
+              </Link>
+            ))}
+
+            <div className="pt-3 border-t">
+              <div className="flex items-center gap-3 px-3">
+                <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                  {userAvatarUrl ? (
+                    <Image
+                      src={userAvatarUrl}
+                      alt={fullName}
+                      width={40}
+                      height={40}
+                      className="object-cover w-full h-full"
+                      unoptimized
+                    />
+                  ) : (
+                    <User className="w-6 h-6 text-gray-500" />
+                  )}
+                </div>
+                <div>
+                  <p className="text-sm font-medium">{fullName}</p>
+                  <p className="text-xs text-gray-500">Employer Account</p>
+                </div>
+              </div>
+
+              <div className="mt-4 space-y-2">
+                <button className="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-lg">
+                  <Settings className="w-5 h-5" />
+                  Settings
+                </button>
+                <button className="w-full flex items-center gap-3 px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg">
+                  <LogOut className="w-5 h-5" />
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }
