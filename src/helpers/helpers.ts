@@ -8,6 +8,14 @@ export const formatSalary = (min: string, max: string) => {
   return `${fmt(min)} – ${fmt(max)}`;
 };
 
+export const formatToPesos = (value: number) => {
+  return Number(value).toLocaleString("en-PH", {
+    style: "currency",
+    currency: "PHP",
+    maximumFractionDigits: 0,
+  });
+};
+
 export const formatDate = (dateStr: string) => {
   return new Date(dateStr).toLocaleDateString("en-US", {
     year: "numeric",
