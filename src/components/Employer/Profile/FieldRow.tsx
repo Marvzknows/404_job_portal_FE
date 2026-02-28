@@ -1,6 +1,15 @@
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-
+export type FieldRowProps = {
+  icon: React.ReactNode;
+  label: string;
+  name: string;
+  value: string;
+  editing: boolean;
+  onChange: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => void;
+  multiline?: boolean;
+  type?: string;
+};
 const FieldRow = ({
   icon,
   label,
@@ -10,51 +19,46 @@ const FieldRow = ({
   onChange,
   type = "text",
   multiline = false,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  editing: boolean;
-  name: string;
-  onChange: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => void;
-  type?: string;
-  multiline?: boolean;
-}) => (
-  <div className="flex items-start gap-4 py-4 border-b border-gray-100 last:border-0">
-    <div className="mt-1 w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center shrink-0 text-gray-500">
-      {icon}
+}: FieldRowProps) => {
+  return (
+    <div className="py-4">
+      <div className="flex items-start gap-3">
+        <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-violet-50 text-violet-500">
+          {icon}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-medium text-muted-foreground mb-1">
+            {label}
+          </p>
+          {editing ? (
+            multiline ? (
+              <textarea
+                name={name}
+                value={value}
+                onChange={onChange}
+                rows={3}
+                className="w-full rounded-lg border border-violet-200 bg-violet-50/30 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-violet-400 focus:outline-none focus:ring-1 focus:ring-violet-400 resize-none transition"
+              />
+            ) : (
+              <input
+                name={name}
+                value={value}
+                onChange={onChange}
+                type={type ?? "text"}
+                className="w-full rounded-lg border border-violet-200 bg-violet-50/30 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-violet-400 focus:outline-none focus:ring-1 focus:ring-violet-400 transition"
+              />
+            )
+          ) : (
+            <p className="text-sm text-foreground break-all">
+              {value || (
+                <span className="italic text-muted-foreground">Not set</span>
+              )}
+            </p>
+          )}
+        </div>
+      </div>
     </div>
-    <div className="flex-1 min-w-0">
-      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
-        {label}
-      </p>
-      {editing ? (
-        multiline ? (
-          <Textarea
-            name={name}
-            value={value}
-            onChange={onChange}
-            rows={3}
-            className="text-sm text-gray-800 resize-none"
-          />
-        ) : (
-          <Input
-            name={name}
-            value={value}
-            onChange={onChange}
-            type={type}
-            className="text-sm text-gray-800"
-          />
-        )
-      ) : (
-        <p className="text-sm text-gray-800 wrap-break-word">
-          {value || <span className="text-gray-400 italic">Not provided</span>}
-        </p>
-      )}
-    </div>
-  </div>
-);
+  );
+};
 
 export default FieldRow;
