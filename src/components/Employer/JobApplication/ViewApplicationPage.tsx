@@ -25,6 +25,7 @@ import {
   Star,
   CheckCircle,
   XCircle,
+  Download,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -60,6 +61,10 @@ const applicationData = {
       contact_email: "test@gmail.com",
       website: "https://techcorp.com",
     },
+  },
+  cv: {
+    url: "https://example.com/cv/clark-kent.pdf",
+    file_name: "clark-kent-cv.pdf",
   },
 };
 
@@ -170,6 +175,23 @@ const ViewApplicationPage = ({ id = "3" }: { id?: string }) => {
             >
               {status.label}
             </Badge>
+
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5 text-sm border-violet-200 text-violet-700 hover:bg-violet-50 hover:text-violet-800"
+              asChild
+            >
+              <a
+                href={data.cv.url}
+                download={data.cv.file_name}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Download className="h-3.5 w-3.5" />
+                CV
+              </a>
+            </Button>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
