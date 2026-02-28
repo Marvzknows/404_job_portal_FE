@@ -39,7 +39,7 @@ export default function EmployerLayout({
     <AuthGuard allowedRole={["employer"]}>
       <EmployerNavbar
         fullName={user?.full_name ?? "N/A"}
-        userAvatarUrl={user?.avatar.url ?? null}
+        userAvatarUrl={user?.avatar?.url ?? null}
       />
 
       {/* main content */}
