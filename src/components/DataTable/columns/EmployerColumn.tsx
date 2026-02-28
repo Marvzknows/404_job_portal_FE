@@ -12,6 +12,7 @@ import { MoreHorizontal, User } from "lucide-react";
 import { ApplicationListT, ApplicationStatusT } from "@/types/JobApplication";
 import { HeaderType } from "../DataTable";
 import Image from "next/image";
+import Link from "next/link";
 
 const statusConfig: Record<
   ApplicationStatusT,
@@ -120,14 +121,16 @@ export const EmployerJobApplicationColumn =
         key: "actions",
         label: "Actions",
         className: "min-w-[180px]",
-        render: () => (
+        render: (row) => (
           <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              className="h-8 px-4 text-xs font-medium bg-blue-500 hover:bg-blue-600 text-white rounded-md"
-            >
-              View
-            </Button>
+            <Link href={`/employer/applications/${row.id}`}>
+              <Button
+                size="sm"
+                className="h-8 px-4 text-xs font-medium bg-blue-500 hover:bg-blue-600 text-white rounded-md"
+              >
+                View
+              </Button>
+            </Link>
             <Button
               size="sm"
               className="h-8 px-4 text-xs font-medium bg-green-500 hover:bg-green-600 text-white rounded-md"
@@ -171,6 +174,7 @@ export const EmployerJobApplicationColumn =
 
 export const ApplicationListInvoices: ApplicationListT[] = [
   {
+    id: "1",
     avatarUrl: "https://i.pravatar.cc/150?img=1",
     applicantName: "Juan Dela Cruz",
     email: "juan.delacruz@gmail.com",
@@ -179,6 +183,7 @@ export const ApplicationListInvoices: ApplicationListT[] = [
     status: "pending",
   },
   {
+    id: "2",
     avatarUrl: "https://i.pravatar.cc/150?img=2",
     applicantName: "Maria Santos",
     email: "maria.santos@gmail.com",
@@ -187,6 +192,7 @@ export const ApplicationListInvoices: ApplicationListT[] = [
     status: "viewed",
   },
   {
+    id: "3",
     avatarUrl: "https://i.pravatar.cc/150?img=3",
     applicantName: "James Rodriguez",
     email: "james.rodriguez@gmail.com",
@@ -195,6 +201,7 @@ export const ApplicationListInvoices: ApplicationListT[] = [
     status: "shortlisted",
   },
   {
+    id: "4",
     avatarUrl: "https://i.pravatar.cc/150?img=4",
     applicantName: "Angela Lim",
     email: "angela.lim@gmail.com",
@@ -203,6 +210,7 @@ export const ApplicationListInvoices: ApplicationListT[] = [
     status: "accepted",
   },
   {
+    id: "5",
     avatarUrl: "https://i.pravatar.cc/150?img=5",
     applicantName: "Michael Tan",
     email: "michael.tan@gmail.com",
@@ -211,6 +219,7 @@ export const ApplicationListInvoices: ApplicationListT[] = [
     status: "rejected",
   },
   {
+    id: "6",
     avatarUrl: "https://i.pravatar.cc/150?img=6",
     applicantName: "Sofia Reyes",
     email: "sofia.reyes@gmail.com",

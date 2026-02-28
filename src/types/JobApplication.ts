@@ -1,4 +1,5 @@
 export type ApplicationListT = {
+  id: string;
   avatarUrl: string;
   applicantName: string;
   email: string;
