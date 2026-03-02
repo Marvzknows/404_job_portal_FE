@@ -1,12 +1,28 @@
 "use client";
 
 import { useState } from "react";
-import { Bell, Building2, Menu, Settings, User, X } from "lucide-react";
+import {
+  Bell,
+  Building2,
+  Lock,
+  Menu,
+  Settings,
+  User,
+  UserCog,
+  X,
+} from "lucide-react";
 import NavLink from "../NavLink";
 import Image from "next/image";
 import Link from "next/link";
 import LogoutButton from "./LogoutButton";
 import MobileLogoutButton from "./MobileLogoutButton";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 
 type EmployerNavbarProps = {
   fullName: string;
@@ -53,9 +69,27 @@ export default function EmployerNavbar({
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
 
-            <button className="hidden sm:flex p-2 text-gray-600 hover:bg-gray-100 rounded-lg">
-              <Settings className="w-5 h-5" />
-            </button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                  <Settings className="w-5 h-5" />
+                </button>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem>
+                  <Lock className="w-4 h-4 mr-2" />
+                  Change password
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem>
+                  <UserCog className="w-4 h-4 mr-2" />
+                  Update account
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             <div className="hidden sm:block h-6 w-px bg-gray-300 mx-2" />
 
@@ -132,10 +166,6 @@ export default function EmployerNavbar({
               </div>
 
               <div className="mt-4 space-y-2">
-                <button className="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-lg">
-                  <Settings className="w-5 h-5" />
-                  Settings
-                </button>
                 <MobileLogoutButton />
               </div>
             </div>
