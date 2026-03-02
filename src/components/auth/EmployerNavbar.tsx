@@ -92,9 +92,9 @@ export default function EmployerNavbar({
 
                   <DropdownMenuSeparator />
 
-                  <DropdownMenuItem>
+                  <DropdownMenuItem disabled>
                     <UserCog className="w-4 h-4 mr-2" />
-                    Update account
+                    Update account (coming soon)
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
