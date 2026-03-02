@@ -5,11 +5,11 @@ import PageHeader from "@/components/PageHeader";
 const JobSeekerJobListingPage = () => {
   return (
     <div className="flex flex-col gap-4">
-      <JobSeekerSearchFilter />
       <PageHeader
         headerTitle="Find Your Dream Job"
         subHeaderTitle="Browse through thousands of opportunities"
       />
+      <JobSeekerSearchFilter />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <JobSeekerJobCard
           title="Frontend Developer"
