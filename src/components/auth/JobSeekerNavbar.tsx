@@ -35,7 +35,6 @@ const JobSeekerNavbar = ({ fullName, userAvatarUrl }: Props) => {
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
 
   const navLinks = [
-    { href: "/job-seeker/dashboard", label: "Dashboard" },
     { href: "/job-seeker/job-listing", label: "Browse Jobs" },
     { href: "/job-seeker/applications", label: "My Applications" },
     { href: "/job-seeker/saved-jobs", label: "Saved Jobs" },
