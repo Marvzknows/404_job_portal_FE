@@ -15,7 +15,7 @@ type RegisterForm = {
   password_confirmation: string;
 };
 
-type ChangePasswordForm = {
+export type ChangePasswordForm = {
   current_password: string;
   new_password: string;
   new_password_confirmation: string;

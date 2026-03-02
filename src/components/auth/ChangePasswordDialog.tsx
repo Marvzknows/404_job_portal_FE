@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Eye, EyeOff, KeyRound, X } from "lucide-react";
+import { KeyRound, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -9,10 +9,11 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import PasswordInput from "./PasswordInput";
+import { useChangePassword, useLogout } from "@/hooks/useAuth";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 type PasswordField = "current" | "new" | "confirm";
 
@@ -37,6 +38,10 @@ export default function ChangePasswordDialog({
   open,
   onOpenChange,
 }: ChangePasswordDialogProps) {
+  const router = useRouter();
+  const { mutate: changePasswrodAction, isPending } = useChangePassword();
+  const { mutate: logoutAction } = useLogout();
+
   const [form, setForm] = useState({
     current_password: "",
     new_password: "",
@@ -83,8 +88,33 @@ export default function ChangePasswordDialog({
       return;
     }
 
-    // API call here
-    console.log("Form is valid. Ready to submit:", form);
+    changePasswrodAction(
+      {
+        current_password: form.current_password,
+        new_password: form.new_password,
+        new_password_confirmation: form.new_password_confirmation,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Password updated. Logging you out...");
+
+          setTimeout(() => {
+            logoutAction(undefined, {
+              onSuccess: () => {
+                localStorage.clear();
+                router.replace("/login");
+              },
+              onError: () => toast.error("Logout failed"),
+            });
+          }, 2000);
+        },
+        onError: (error) => {
+          const message =
+            error.response?.data?.message || "Updating password failed.";
+          setError(message);
+        },
+      },
+    );
   };
 
   const handleClose = (val: boolean) => {
@@ -161,15 +191,17 @@ export default function ChangePasswordDialog({
               type="button"
               variant="outline"
               className="flex-1"
+              disabled={isPending}
               onClick={() => handleClose(false)}
             >
               Cancel
             </Button>
             <Button
               type="submit"
+              disabled={isPending}
               className="flex-1 bg-violet-600 hover:bg-violet-700 text-white"
             >
-              Update Password
+              {isPending ? "Saving... " : "Update Password"}
             </Button>
           </div>
         </form>
