@@ -15,6 +15,12 @@ type RegisterForm = {
   password_confirmation: string;
 };
 
+export type ChangePasswordForm = {
+  current_password: string;
+  new_password: string;
+  new_password_confirmation: string;
+};
+
 export const authService = {
   login: async (data: LoginForm) => {
     const res = await api.post("/login", data);
@@ -33,6 +39,11 @@ export const authService = {
 
   me: async (): Promise<MeResponseT> => {
     const res = await api.get<MeResponseT>("/me");
+    return res.data;
+  },
+
+  changePassword: async (data: ChangePasswordForm) => {
+    const res = await api.post("/change-password", data);
     return res.data;
   },
 };

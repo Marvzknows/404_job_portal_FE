@@ -1,6 +1,5 @@
 "use client";
 
-import { useAuth } from "@/context/AuthProvider";
 import { token } from "@/lib/token";
 import { UserT } from "@/types/auth";
 import { usePathname, useRouter } from "next/navigation";
@@ -14,8 +13,7 @@ type AuthGuardProps = {
 const AuthGuard = ({ allowedRole, children }: AuthGuardProps) => {
   const router = useRouter();
   const pathname = usePathname();
-  const a = useAuth();
-  console.log(a);
+
   useEffect(() => {
     // Run only in browser
     const storedToken = token.get();
