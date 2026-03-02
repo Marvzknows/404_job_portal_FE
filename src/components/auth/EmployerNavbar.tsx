@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Bell, Building2, LogOut, Menu, Settings, User, X } from "lucide-react";
+import { Bell, Building2, Menu, Settings, User, X } from "lucide-react";
 import NavLink from "../NavLink";
 import Image from "next/image";
 import Link from "next/link";
+import LogoutButton from "./LogoutButton";
+import MobileLogoutButton from "./MobileLogoutButton";
 
 type EmployerNavbarProps = {
   fullName: string;
@@ -79,12 +81,7 @@ export default function EmployerNavbar({
 
             <div className="hidden sm:block h-6 w-px bg-gray-300 mx-1" />
 
-            <button className="hidden sm:flex items-center gap-1.5 px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-              <LogOut className="w-4 h-4" />
-              <span className="text-sm font-medium hidden lg:block">
-                Logout
-              </span>
-            </button>
+            <LogoutButton />
 
             {/* Mobile Toggle */}
             <button
@@ -139,10 +136,7 @@ export default function EmployerNavbar({
                   <Settings className="w-5 h-5" />
                   Settings
                 </button>
-                <button className="w-full flex items-center gap-3 px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg">
-                  <LogOut className="w-5 h-5" />
-                  Logout
-                </button>
+                <MobileLogoutButton />
               </div>
             </div>
           </div>

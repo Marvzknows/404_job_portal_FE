@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { Briefcase, Clock, MapPin, PhilippinePeso, User2 } from "lucide-react";
+import { Clock, MapPin, PhilippinePeso, User2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { formatSalary, formatToPesos } from "@/helpers/helpers";
+import { formatToPesos } from "@/helpers/helpers";
 
 type JobCardProps = {
   title: string;

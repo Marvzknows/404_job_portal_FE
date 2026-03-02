@@ -20,3 +20,9 @@ export const useMe = () => {
     queryFn: authService.me,
   });
 };
+
+export const useLogout = () => {
+  return useMutation({
+    mutationFn: authService.logout,
+  });
+};
