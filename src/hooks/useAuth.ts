@@ -26,3 +26,9 @@ export const useLogout = () => {
     mutationFn: authService.logout,
   });
 };
+
+export const useChangePassword = () => {
+  return useMutation({
+    mutationFn: authService.changePassword,
+  });
+};
