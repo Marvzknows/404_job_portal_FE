@@ -9,7 +9,6 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import {
   Pencil,
-  X,
   Check,
   Upload,
   Download,
