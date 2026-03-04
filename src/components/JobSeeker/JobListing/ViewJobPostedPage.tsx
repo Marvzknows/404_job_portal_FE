@@ -26,6 +26,8 @@ import Section from "../JobApplication/Section";
 import StatusBadge from "../JobApplication/StatusBadge";
 import { formatDate, formatLabel, formatSalary } from "@/helpers/helpers";
 import InfoRow from "../JobApplication/InfoRow";
+import Image from "next/image";
+
 const mockJob = {
   id: 3,
   employer_id: 4,
@@ -123,15 +125,14 @@ const ViewJobPostedPage = ({ id }: Props) => {
 
         <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-5">
           <div className="flex items-start gap-4">
-            <div className="w-14 h-14 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center shrink-0 overflow-hidden">
+            <div className="w-14 h-14 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center shrink-0 overflow-hidden relative">
               {employer.logo?.url ? (
-                <img
+                <Image
                   src={employer.logo.url}
                   alt={employer.company_name}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = "none";
-                  }}
+                  fill
+                  className="object-cover"
+                  unoptimized
                 />
               ) : (
                 <Building2 className="w-7 h-7 text-slate-300" />
@@ -209,15 +210,14 @@ const ViewJobPostedPage = ({ id }: Props) => {
         title="About the Company"
       >
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-center shrink-0 overflow-hidden">
+          <div className="w-10 h-10 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-center shrink-0 overflow-hidden relative">
             {employer.logo?.url ? (
-              <img
+              <Image
                 src={employer.logo.url}
                 alt={employer.company_name}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = "none";
-                }}
+                fill
+                className="object-cover"
+                unoptimized
               />
             ) : (
               <Building2 className="w-5 h-5 text-slate-300" />
