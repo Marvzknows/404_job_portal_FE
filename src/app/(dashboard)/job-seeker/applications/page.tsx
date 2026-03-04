@@ -18,14 +18,14 @@ const JobSeekerApplicationPage = () => {
           companyName="Accenture"
           dateApplied="January 15, 2026"
           status="rejected"
-          href="/applications/1"
+          href="/job-seeker/applications/1"
         />
         <ApplicationCard
           jobTitle="Backend Developer"
           companyName="Pro-Solutions Technology Co."
           dateApplied="Decenber 25, 2026"
           status="pending"
-          href="/applications/1"
+          href="/job-seeker/applications/2"
         />
       </div>
     </div>

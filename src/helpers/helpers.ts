@@ -23,3 +23,6 @@ export const formatDate = (dateStr: string) => {
     day: "numeric",
   });
 };
+
+export const formatLabel = (str: string) =>
+  str.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
