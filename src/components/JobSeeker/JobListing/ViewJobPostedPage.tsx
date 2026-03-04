@@ -61,8 +61,9 @@ const mockJob = {
 // TipTap read-only viewer
 const JobDescriptionViewer = ({ content }: { content: string }) => {
   let parsed: object | null = null;
+
   try {
-    parsed = JSON.parse(content);
+    parsed = content ? JSON.parse(content) : null;
   } catch {
     parsed = null;
   }
@@ -71,17 +72,17 @@ const JobDescriptionViewer = ({ content }: { content: string }) => {
     immediatelyRender: false,
     editable: false,
     extensions: [
-      StarterKit, // disable built-in heading
+      StarterKit,
       Underline,
       Heading.configure({ levels: [1, 2, 3, 4] }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       Blockquote,
     ],
-    content: content ? JSON.parse(content) : "",
+    content: parsed ?? "",
     editorProps: {
       attributes: {
         class:
-          "min-h-[160px] px-3 py-2" +
+          "min-h-[160px] px-3 py-2 " +
           "[&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-6 [&_ol]:pl-6 " +
           "[&_blockquote]:border-l-2 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 " +
           "[&_h1]:text-4xl [&_h1]:mb-2 " +
@@ -93,11 +94,9 @@ const JobDescriptionViewer = ({ content }: { content: string }) => {
   });
 
   return (
-    <>
-      <div className="tiptap-viewer">
-        <EditorContent editor={editor} />
-      </div>
-    </>
+    <div className="tiptap-viewer">
+      <EditorContent editor={editor} />
+    </div>
   );
 };
 
@@ -106,6 +105,7 @@ type Props = { id: string };
 const ViewJobPostedPage = ({ id }: Props) => {
   const data = mockJob;
   const { employer } = data;
+  console.log(id);
 
   return (
     <div className="flex flex-col gap-5 w-full">

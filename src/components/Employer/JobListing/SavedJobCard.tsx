@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatLabel, formatSalary, timeAgo } from "@/helpers/helpers";
 import { SavedJob } from "@/app/(dashboard)/job-seeker/saved-jobs/page";
+import Image from "next/image";
 
 const workSetupColor: Record<string, string> = {
   remote: "bg-sky-50 text-sky-700 border-sky-200",
@@ -67,7 +68,7 @@ const SavedJobCard = ({
         <div className="flex items-start gap-3">
           <div className="w-11 h-11 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center shrink-0 overflow-hidden">
             {employer.logo_url ? (
-              <img
+              <Image
                 src={employer.logo_url}
                 alt={employer.company_name}
                 className="w-full h-full object-cover"
