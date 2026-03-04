@@ -36,7 +36,7 @@ const JobSeekerJobListingPage = () => {
           datePosted="1/15/2026"
           maxSalary={50000}
           minSalary={15000}
-          href="/employer/dashboard"
+          href="/job-seeker/job-listing/1"
           companyName="Accenture"
           companyLogo="https://api.dicebear.com/7.x/initials/svg?seed=Accenture"
           handleApply={handleApply}
@@ -49,7 +49,7 @@ const JobSeekerJobListingPage = () => {
           datePosted="5/4/2026"
           maxSalary={50000}
           minSalary={15000}
-          href="/employer/dashboard"
+          href="/job-seeker/job-listing/2"
           companyName="IBM"
           companyLogo="https://api.dicebear.com/7.x/initials/svg?seed=IBM"
           handleApply={handleApply}
@@ -62,7 +62,7 @@ const JobSeekerJobListingPage = () => {
           datePosted="1/15/2026"
           maxSalary={50000}
           minSalary={15000}
-          href="/employer/dashboard"
+          href="/job-seeker/job-listing/3"
           companyName="Big Ben Group"
           companyLogo="https://api.dicebear.com/7.x/initials/svg?seed=Big%20Ben%20Group"
           handleApply={handleApply}
@@ -75,7 +75,7 @@ const JobSeekerJobListingPage = () => {
           datePosted="5/4/2026"
           maxSalary={50000}
           minSalary={15000}
-          href="/employer/dashboard"
+          href="/job-seeker/job-listing/4"
           companyName="JP Morgan"
           companyLogo="https://api.dicebear.com/7.x/initials/svg?seed=JP%20Morgan"
           handleApply={handleApply}
