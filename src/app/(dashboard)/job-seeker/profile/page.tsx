@@ -128,7 +128,7 @@ const JobSeekerProfilePage = () => {
         subHeaderTitle="Manage your profile and resume"
       />
 
-      <div className="flex flex-col gap-4 max-w-3xl w-full">
+      <div className="flex flex-col gap-4 w-full">
         {/* ── Profile Header Card ── */}
         <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
           <div className="flex items-start gap-4">
