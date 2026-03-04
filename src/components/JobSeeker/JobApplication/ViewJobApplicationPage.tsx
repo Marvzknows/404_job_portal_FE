@@ -68,6 +68,7 @@ const mockApplication = {
 type Props = { id: string };
 
 const ViewJobApplicationPage = ({ id }: Props) => {
+  console.log(id);
   const data = mockApplication;
   const { job_seeker, job_listing } = data;
   const { employer } = job_listing;
@@ -76,7 +77,7 @@ const ViewJobApplicationPage = ({ id }: Props) => {
     <div className="flex flex-col gap-5 w-full">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <Link href="/applications">
+          <Link href="/job-seeker/applications">
             <Button
               variant="ghost"
               size="sm"

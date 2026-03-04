@@ -23,7 +23,7 @@ const InfoRow = ({
           {value}
         </a>
       ) : (
-        <p className="text-sm text-slate-700 break-words">{value}</p>
+        <p className="text-sm text-slate-700 wrap-break-words">{value}</p>
       )}
     </div>
   </div>
