@@ -48,14 +48,14 @@ const JobSeekerNavbar = ({ fullName, userAvatarUrl }: Props) => {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <Link
-              href="/employer/dashboard"
+              href="/job-seeker/job-listing"
               className="flex items-center gap-3"
             >
               <Building2 className="w-8 h-8 text-violet-600" />
               <span className="text-xl font-bold text-gray-900">JobPortal</span>
-              <span className="text-sm text-gray-500 ml-2 hidden sm:block">
+              {/* <span className="text-sm text-gray-500 ml-2 hidden sm:block">
                 Employer
-              </span>
+              </span> */}
             </Link>
 
             {/* Desktop Nav */}
@@ -170,7 +170,7 @@ const JobSeekerNavbar = ({ fullName, userAvatarUrl }: Props) => {
                   </div>
                   <div>
                     <p className="text-sm font-medium">{fullName}</p>
-                    <p className="text-xs text-gray-500">Employer Account</p>
+                    <p className="text-xs text-gray-500">Job Seeker Account</p>
                   </div>
                 </div>
 
