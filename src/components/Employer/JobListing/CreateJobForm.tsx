@@ -11,8 +11,13 @@ import {
 } from "@/components/ui/select";
 import { useState } from "react";
 import JobDescriptionEditor from "./JobDescriptionEditor";
+import { useCreateJob } from "@/hooks/useJob";
+import { CreateJobFormT } from "@/services/job.service";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 const CreateJobForm = () => {
+  const { mutate: createJob, isPending } = useCreateJob();
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -77,13 +82,28 @@ const CreateJobForm = () => {
     e.preventDefault();
     if (!validate()) return;
 
-    const payload = {
+    const payload: CreateJobFormT = {
       ...form,
       salary_min: Number(form.salary_min),
       salary_max: Number(form.salary_max),
     };
 
-    console.log("Submit payload:", payload);
+    createJob(payload, {
+      onSuccess: () => {
+        toast.success("Job created successfully");
+        setForm({
+          title: "",
+          description: "",
+          salary_min: "",
+          salary_max: "",
+          work_setup: "",
+          job_type: "",
+        });
+      },
+      onError: (error) => {
+        toast.error("Error creating job: " + error.message);
+      },
+    });
   };
 
   return (
@@ -195,8 +215,12 @@ const CreateJobForm = () => {
       </div>
 
       <div className="flex justify-end">
-        <Button className="bg-violet-600 hover:bg-violet-700">
+        <Button
+          disabled={isPending}
+          className="bg-violet-600 hover:bg-violet-700"
+        >
           Create Job Post
+          {isPending ? <Loader2 className="animate-spin" /> : null}
         </Button>
       </div>
     </form>
