@@ -14,10 +14,14 @@ import JobDescriptionEditor from "./JobDescriptionEditor";
 import { useCreateJob } from "@/hooks/useJob";
 import { CreateJobFormT } from "@/services/job.service";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, UserCog, ArrowRight } from "lucide-react";
+import { useAuth } from "@/context/AuthProvider";
+import Link from "next/link";
+import UpdateEmployerProfile from "../UpdateEmployerProfile";
 
 const CreateJobForm = () => {
   const { mutate: createJob, isPending } = useCreateJob();
+  const { profile } = useAuth();
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -45,14 +49,12 @@ const CreateJobForm = () => {
   const validate = () => {
     const newErrors: Partial<typeof form> = {};
 
-    // Required fields
     if (!form.title.trim()) newErrors.title = "Job title is required";
     if (!form.description.trim())
       newErrors.description = "Description is required";
     if (!form.work_setup) newErrors.work_setup = "Work setup is required";
     if (!form.job_type) newErrors.job_type = "Job type is required";
 
-    // Salary validations
     const minSalary = Number(form.salary_min);
     const maxSalary = Number(form.salary_max);
 
@@ -105,6 +107,10 @@ const CreateJobForm = () => {
       },
     });
   };
+
+  if (!profile) {
+    return <UpdateEmployerProfile />;
+  }
 
   return (
     <form
