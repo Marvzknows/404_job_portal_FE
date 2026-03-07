@@ -2,7 +2,7 @@
 
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Building2,
   Globe,
@@ -19,13 +19,36 @@ import FieldRow, {
   FieldRowProps,
 } from "@/components/Employer/Profile/FieldRow";
 import { CompanyProfile, initialData } from "@/types/JobApplication";
+import { useAuth } from "@/context/AuthProvider";
+import { useEmployerProfile } from "@/hooks/useProfile";
 
 const EmployerProfilePage = () => {
+  const { profile: userProfile } = useAuth();
   const [profile, setProfile] = useState<CompanyProfile>(initialData);
   const [draft, setDraft] = useState<CompanyProfile>(initialData);
   const [editing, setEditing] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { data: employerProfile } = useEmployerProfile(userProfile?.id, {
+    enabled: userProfile != null,
+  });
+
+  useEffect(() => {
+    if (!employerProfile?.data) return;
+    const { data } = employerProfile;
+    const mapped: CompanyProfile = {
+      company_name: data.company_name ?? "",
+      company_description: data.company_description ?? "",
+      website: data.website ?? "",
+      contact_email: data.contact_email ?? "",
+      contact_phone: data.contact_phone ?? "",
+      location: data.location ?? "",
+      logo: data.logo ?? null,
+    };
+    setProfile(mapped);
+    setDraft(mapped);
+  }, [employerProfile]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -41,9 +64,9 @@ const EmployerProfilePage = () => {
   };
 
   const handleSave = () => {
-    setProfile({ ...draft });
     setEditing(false);
     setLogoPreview(null);
+    console.log("Profile saved:", { ...draft });
   };
 
   const handleCancel = () => {
@@ -52,7 +75,9 @@ const EmployerProfilePage = () => {
     setLogoPreview(null);
   };
 
+  // logoPreview (new file selected) > saved logo URL > null (show initials)
   const logoSrc = logoPreview ?? profile.logo?.url ?? null;
+
   const initials = profile.company_name
     .split(" ")
     .map((w) => w[0])
