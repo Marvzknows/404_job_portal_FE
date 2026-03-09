@@ -64,6 +64,13 @@ const EmployerProfilePage = () => {
     setDraft(mapped);
   }, [employerProfile]);
 
+  // Sync profileId whenever userProfile loads (it's async)
+  useEffect(() => {
+    if (userProfile?.id) {
+      setProfileId(userProfile.id);
+    }
+  }, [userProfile?.id]);
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
@@ -99,8 +106,18 @@ const EmployerProfilePage = () => {
     if (file) {
       formData.append("logo", file);
     }
+
+    if (profileId) {
+      // Update existing profile logic here (not implemented in this snippet)
+      alert("Update profile API not implemented in this snippet");
+      return;
+    }
+
+    // No profile ID means need to create a new profile
     createEmployerProfile(formData, {
       onSuccess: async (res) => {
+        // Only set this if useEmployerProfile uses the employer profile's own ID
+        // If it uses userProfile.id, remove this line entirely
         setProfileId(res.data.id);
         setEditing(false);
         setLogoPreview(null);
