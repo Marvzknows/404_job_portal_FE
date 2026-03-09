@@ -197,7 +197,7 @@ const CreateJobForm = () => {
               <SelectItem value="full_time">Full Time</SelectItem>
               <SelectItem value="part_time">Part Time</SelectItem>
               <SelectItem value="contract">Contract</SelectItem>
-              <SelectItem value="freelance">Freelance</SelectItem>
+              <SelectItem value="internship">Internship</SelectItem>
             </SelectContent>
           </Select>
           {errors.job_type && (

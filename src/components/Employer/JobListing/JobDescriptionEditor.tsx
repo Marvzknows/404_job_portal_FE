@@ -22,6 +22,7 @@ import {
   Heading3 as TypeH3,
   Heading4 as TypeH4,
 } from "lucide-react";
+import { useEffect } from "react";
 
 type JobDescriptionEditorProps = {
   value: string;
@@ -82,6 +83,16 @@ const JobDescriptionEditor = ({
       onChange(JSON.stringify(editor.getJSON()));
     },
   });
+
+  useEffect(() => {
+    if (!editor) return;
+
+    if (!value) {
+      editor.commands.clearContent();
+    } else {
+      editor.commands.setContent(JSON.parse(value));
+    }
+  }, [value, editor]);
 
   if (!editor) return null;
 
