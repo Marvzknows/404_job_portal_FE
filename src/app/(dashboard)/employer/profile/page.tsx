@@ -29,6 +29,9 @@ const EmployerProfilePage = () => {
   const [editing, setEditing] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof CompanyProfile, string>>
+  >({});
 
   const { data: employerProfile } = useEmployerProfile(userProfile?.id, {
     enabled: userProfile != null,
@@ -54,7 +57,13 @@ const EmployerProfilePage = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
+
     setDraft((prev) => ({ ...prev, [name]: value }));
+
+    setErrors((prev) => ({
+      ...prev,
+      [name]: "",
+    }));
   };
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -64,6 +73,8 @@ const EmployerProfilePage = () => {
   };
 
   const handleSave = () => {
+    if (!validate()) return;
+
     setEditing(false);
     setLogoPreview(null);
     console.log("Profile saved:", { ...draft });
@@ -93,6 +104,7 @@ const EmployerProfilePage = () => {
       value: editing ? draft.company_name : profile.company_name,
       editing,
       onChange: handleChange,
+      error: errors.company_name,
     },
     {
       icon: <Pencil className="w-4 h-4" />,
@@ -102,6 +114,7 @@ const EmployerProfilePage = () => {
       editing,
       onChange: handleChange,
       multiline: true,
+      error: errors.company_description,
     },
     {
       icon: <Globe className="w-4 h-4" />,
@@ -111,6 +124,7 @@ const EmployerProfilePage = () => {
       editing,
       onChange: handleChange,
       type: "url",
+      error: errors.website,
     },
     {
       icon: <Mail className="w-4 h-4" />,
@@ -120,6 +134,7 @@ const EmployerProfilePage = () => {
       editing,
       onChange: handleChange,
       type: "email",
+      error: errors.contact_email,
     },
     {
       icon: <Phone className="w-4 h-4" />,
@@ -129,6 +144,7 @@ const EmployerProfilePage = () => {
       editing,
       onChange: handleChange,
       type: "tel",
+      error: errors.contact_phone,
     },
     {
       icon: <MapPin className="w-4 h-4" />,
@@ -137,8 +153,30 @@ const EmployerProfilePage = () => {
       value: editing ? draft.location : profile.location,
       editing,
       onChange: handleChange,
+      error: errors.location,
     },
   ];
+
+  const validate = () => {
+    const newErrors: Partial<Record<keyof CompanyProfile, string>> = {};
+
+    if (!draft.company_name.trim()) {
+      newErrors.company_name = "Company name is required";
+    }
+
+    if (!draft.location.trim()) {
+      newErrors.location = "Location is required";
+    }
+
+    if (!draft.company_description.trim()) {
+      newErrors.company_description =
+        "Description must be at least 10 characters";
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
 
   return (
     <div className="flex flex-col gap-6">

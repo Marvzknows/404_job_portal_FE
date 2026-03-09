@@ -9,6 +9,7 @@ export type FieldRowProps = {
   ) => void;
   multiline?: boolean;
   type?: string;
+  error?: string;
 };
 const FieldRow = ({
   icon,
@@ -19,6 +20,7 @@ const FieldRow = ({
   onChange,
   type = "text",
   multiline = false,
+  error,
 }: FieldRowProps) => {
   return (
     <div className="py-4">
@@ -32,21 +34,27 @@ const FieldRow = ({
           </p>
           {editing ? (
             multiline ? (
-              <textarea
-                name={name}
-                value={value}
-                onChange={onChange}
-                rows={3}
-                className="w-full rounded-lg border border-violet-200 bg-violet-50/30 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-violet-400 focus:outline-none focus:ring-1 focus:ring-violet-400 resize-none transition"
-              />
+              <div className="flex flex-col">
+                <textarea
+                  name={name}
+                  value={value}
+                  onChange={onChange}
+                  rows={3}
+                  className="w-full rounded-lg border border-violet-200 bg-violet-50/30 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-violet-400 focus:outline-none focus:ring-1 focus:ring-violet-400 resize-none transition"
+                />
+                {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
+              </div>
             ) : (
-              <input
-                name={name}
-                value={value}
-                onChange={onChange}
-                type={type ?? "text"}
-                className="w-full rounded-lg border border-violet-200 bg-violet-50/30 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-violet-400 focus:outline-none focus:ring-1 focus:ring-violet-400 transition"
-              />
+              <div className="flex flex-col">
+                <input
+                  name={name}
+                  value={value}
+                  onChange={onChange}
+                  type={type ?? "text"}
+                  className="w-full rounded-lg border border-violet-200 bg-violet-50/30 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-violet-400 focus:outline-none focus:ring-1 focus:ring-violet-400 transition"
+                />
+                {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
+              </div>
             )
           ) : (
             <p className="text-sm text-foreground break-all">
