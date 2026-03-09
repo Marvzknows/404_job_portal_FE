@@ -4,6 +4,13 @@ import { EmployerProfileT } from "@/types/Employer";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 
+export type CreateEmployerProfileResponse = {
+  message: string;
+  data: {
+    id: number;
+  };
+};
+
 export const useEmployerProfile = (
   id: number | undefined,
   options?: { enabled?: boolean },
@@ -16,7 +23,17 @@ export const useEmployerProfile = (
 };
 
 export const useCreateEmployerProfile = () => {
-  return useMutation<void, AxiosError<ApiErrorResponse>, FormData>({
+  return useMutation<
+    CreateEmployerProfileResponse,
+    AxiosError<ApiErrorResponse>,
+    FormData
+  >({
     mutationFn: profileService.createEmployerProfile,
+  });
+};
+
+export const useUpdateEmployerProfile = (id: number) => {
+  return useMutation<void, AxiosError<ApiErrorResponse>, FormData>({
+    mutationFn: (data) => profileService.UpdateEmployerProfileApi(id, data),
   });
 };

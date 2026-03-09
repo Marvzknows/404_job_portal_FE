@@ -28,7 +28,10 @@ import {
 import { toast } from "sonner";
 
 const EmployerProfilePage = () => {
-  const { profile: userProfile, setProfile: setEmployerProfile } = useAuth();
+  const { profile: userProfile } = useAuth();
+  const [profileId, setProfileId] = useState<number | undefined>(
+    userProfile?.id,
+  );
   const [profile, setProfile] = useState<CompanyProfile>(initialData);
   const [draft, setDraft] = useState<CompanyProfile>(initialData);
   const [editing, setEditing] = useState(false);
@@ -38,10 +41,9 @@ const EmployerProfilePage = () => {
     Partial<Record<keyof CompanyProfile, string>>
   >({});
 
-  const { data: employerProfile, refetch: refetchEmployerProfile } =
-    useEmployerProfile(userProfile?.id, {
-      enabled: userProfile != null,
-    });
+  const { data: employerProfile } = useEmployerProfile(profileId, {
+    enabled: profileId != null,
+  });
 
   const { mutate: createEmployerProfile, isPending: isCreatingProfile } =
     useCreateEmployerProfile();
@@ -98,8 +100,8 @@ const EmployerProfilePage = () => {
       formData.append("logo", file);
     }
     createEmployerProfile(formData, {
-      onSuccess: async () => {
-        setProfile(draft);
+      onSuccess: async (res) => {
+        setProfileId(res.data.id);
         setEditing(false);
         setLogoPreview(null);
         toast.success("Profile created successfully!");

@@ -1,3 +1,4 @@
+import UpdateEmployerProfile from "@/components/Employer/UpdateEmployerProfile";
 import api from "@/lib/axios";
 
 export const profileService = {
@@ -8,6 +9,15 @@ export const profileService = {
 
   createEmployerProfile: async (data: FormData) => {
     const response = await api.post("/employer/create", data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  },
+
+  UpdateEmployerProfileApi: async (id: number, data: FormData) => {
+    const response = await api.put(`/employer/${id}`, data, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
