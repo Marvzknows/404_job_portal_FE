@@ -24,4 +24,13 @@ export const profileService = {
     });
     return response.data;
   },
+
+  UpdateEmployerProfileLogo: async (id: number, logo: File) => {
+    const response = await api.put(`/employer/${id}/logo`, logo, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  },
 };

@@ -24,6 +24,7 @@ import { useAuth } from "@/context/AuthProvider";
 import {
   useCreateEmployerProfile,
   useEmployerProfile,
+  useUpdateEmployerProfile,
 } from "@/hooks/useProfile";
 import { toast } from "sonner";
 
@@ -41,12 +42,22 @@ const EmployerProfilePage = () => {
     Partial<Record<keyof CompanyProfile, string>>
   >({});
 
-  const { data: employerProfile } = useEmployerProfile(profileId, {
-    enabled: profileId != null,
-  });
+  const { data: employerProfile, refetch: refetchEmployerProfile } =
+    useEmployerProfile(profileId, {
+      enabled: profileId != null,
+    });
 
+  // #region Mutations
   const { mutate: createEmployerProfile, isPending: isCreatingProfile } =
     useCreateEmployerProfile();
+
+  const { mutate: updateEmployerProfile, isPending: isUpdatingProfile } =
+    useUpdateEmployerProfile(profileId ?? 0);
+
+  const { mutate: updateLogo, isPending: isUpdatingLogo } =
+    useUpdateEmployerProfile(profileId ?? 0);
+  // #endregion
+  const isPending = isCreatingProfile || isUpdatingProfile || isUpdatingLogo;
 
   useEffect(() => {
     if (!employerProfile?.data) return;
@@ -92,7 +103,6 @@ const EmployerProfilePage = () => {
 
   const handleSave = () => {
     if (!validate()) return;
-
     const formData = new FormData();
 
     formData.append("company_name", draft.company_name);
@@ -109,7 +119,19 @@ const EmployerProfilePage = () => {
 
     if (profileId) {
       // Update existing profile logic here (not implemented in this snippet)
-      alert("Update profile API not implemented in this snippet");
+      updateEmployerProfile(formData, {
+        onSuccess: () => {
+          refetchEmployerProfile();
+          setLogoPreview(null);
+          setEditing(false);
+        },
+        onError: (error) => {
+          toast.error(
+            error.response?.data?.message ||
+              "Failed to update profile. Please try again.",
+          );
+        },
+      });
       return;
     }
 
@@ -333,15 +355,12 @@ const EmployerProfilePage = () => {
                     </Button>
                     <Button
                       onClick={handleSave}
-                      disabled={isCreatingProfile}
+                      disabled={isPending}
                       size="sm"
                       className="gap-1.5 text-sm bg-violet-600 hover:bg-violet-700 text-white"
                     >
                       <Save className="w-3.5 h-3.5" />
-                      Save{" "}
-                      {isCreatingProfile && (
-                        <Loader2 className="animate-spin" />
-                      )}
+                      Save {isPending && <Loader2 className="animate-spin" />}
                     </Button>
                   </div>
                 )}
