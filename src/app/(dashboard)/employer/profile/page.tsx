@@ -2,7 +2,7 @@
 
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useMemo } from "react";
 import {
   Building2,
   Globe,
@@ -30,10 +30,10 @@ import { toast } from "sonner";
 
 const EmployerProfilePage = () => {
   const { profile: userProfile } = useAuth();
-  const [profileId, setProfileId] = useState<number | undefined>(
-    userProfile?.id,
-  );
-  const [profile, setProfile] = useState<CompanyProfile>(initialData);
+  const [createdProfileId, setCreatedProfileId] = useState<
+    number | undefined
+  >();
+  const profileId = createdProfileId ?? userProfile?.id;
   const [draft, setDraft] = useState<CompanyProfile>(initialData);
   const [editing, setEditing] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
@@ -47,22 +47,10 @@ const EmployerProfilePage = () => {
       enabled: profileId != null,
     });
 
-  // #region Mutations
-  const { mutate: createEmployerProfile, isPending: isCreatingProfile } =
-    useCreateEmployerProfile();
-
-  const { mutate: updateEmployerProfile, isPending: isUpdatingProfile } =
-    useUpdateEmployerProfile(profileId ?? 0);
-
-  const { mutate: updateLogo, isPending: isUpdatingLogo } =
-    useUpdateEmployerProfile(profileId ?? 0);
-  // #endregion
-  const isPending = isCreatingProfile || isUpdatingProfile || isUpdatingLogo;
-
-  useEffect(() => {
-    if (!employerProfile?.data) return;
-    const { data } = employerProfile;
-    const mapped: CompanyProfile = {
+  const serverProfile = useMemo<CompanyProfile>(() => {
+    const data = employerProfile?.data;
+    if (!data) return initialData;
+    return {
       company_name: data.company_name ?? "",
       company_description: data.company_description ?? "",
       website: data.website ?? "",
@@ -71,28 +59,33 @@ const EmployerProfilePage = () => {
       location: data.location ?? "",
       logo: data.logo ?? null,
     };
-    setProfile(mapped);
-    setDraft(mapped);
   }, [employerProfile]);
 
-  // Sync profileId whenever userProfile loads (it's async)
-  useEffect(() => {
-    if (userProfile?.id) {
-      setProfileId(userProfile.id);
-    }
-  }, [userProfile?.id]);
+  // Reset draft to latest server data when it changes (only while not editing).
+  // setState during render (outside effects) is the React-approved pattern for derived state.
+  const [prevServerProfile, setPrevServerProfile] = useState(serverProfile);
+
+  if (prevServerProfile !== serverProfile && !editing) {
+    setPrevServerProfile(serverProfile);
+    setDraft(serverProfile);
+  }
+
+  // #region Mutations
+  const { mutate: createEmployerProfile, isPending: isCreatingProfile } =
+    useCreateEmployerProfile();
+
+  const { mutate: updateEmployerProfile, isPending: isUpdatingProfile } =
+    useUpdateEmployerProfile(profileId ?? 0);
+  // #endregion
+
+  const isPending = isCreatingProfile || isUpdatingProfile;
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
-
     setDraft((prev) => ({ ...prev, [name]: value }));
-
-    setErrors((prev) => ({
-      ...prev,
-      [name]: "",
-    }));
+    setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -103,27 +96,29 @@ const EmployerProfilePage = () => {
 
   const handleSave = () => {
     if (!validate()) return;
-    const formData = new FormData();
 
-    formData.append("company_name", draft.company_name);
-    formData.append("company_description", draft.company_description);
-    formData.append("website", draft.website);
-    formData.append("contact_email", draft.contact_email);
-    formData.append("contact_phone", draft.contact_phone);
-    formData.append("location", draft.location);
     const file = fileInputRef.current?.files?.[0];
 
-    if (file) {
-      formData.append("logo", file);
-    }
-
     if (profileId) {
-      // Update existing profile logic here (not implemented in this snippet)
-      updateEmployerProfile(formData, {
+      const profileFormData = new FormData();
+      profileFormData.append("company_name", draft.company_name);
+      profileFormData.append("company_description", draft.company_description);
+      profileFormData.append("website", draft.website);
+      profileFormData.append("contact_email", draft.contact_email);
+      profileFormData.append("contact_phone", draft.contact_phone);
+      profileFormData.append("location", draft.location);
+
+      if (file) {
+        profileFormData.append("logo", file);
+      }
+
+      updateEmployerProfile(profileFormData, {
         onSuccess: () => {
           refetchEmployerProfile();
           setLogoPreview(null);
+          if (fileInputRef.current) fileInputRef.current.value = "";
           setEditing(false);
+          toast.success("Profile updated successfully!");
         },
         onError: (error) => {
           toast.error(
@@ -135,14 +130,22 @@ const EmployerProfilePage = () => {
       return;
     }
 
-    // No profile ID means need to create a new profile
+    // No profile ID means create new profile
+    const formData = new FormData();
+    formData.append("company_name", draft.company_name);
+    formData.append("company_description", draft.company_description);
+    formData.append("website", draft.website);
+    formData.append("contact_email", draft.contact_email);
+    formData.append("contact_phone", draft.contact_phone);
+    formData.append("location", draft.location);
+    if (file) formData.append("logo", file);
+
     createEmployerProfile(formData, {
-      onSuccess: async (res) => {
-        // Only set this if useEmployerProfile uses the employer profile's own ID
-        // If it uses userProfile.id, remove this line entirely
-        setProfileId(res.data.id);
+      onSuccess: (res) => {
+        setCreatedProfileId(res.data.id);
         setEditing(false);
         setLogoPreview(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
         toast.success("Profile created successfully!");
       },
       onError: (error) => {
@@ -155,15 +158,15 @@ const EmployerProfilePage = () => {
   };
 
   const handleCancel = () => {
-    setDraft({ ...profile });
+    setDraft({ ...serverProfile });
     setEditing(false);
     setLogoPreview(null);
   };
 
   // logoPreview (new file selected) > saved logo URL > null (show initials)
-  const logoSrc = logoPreview ?? profile.logo?.url ?? null;
+  const logoSrc = logoPreview ?? serverProfile.logo?.url ?? null;
 
-  const initials = profile.company_name
+  const initials = serverProfile.company_name
     .split(" ")
     .map((w) => w[0])
     .join("")
@@ -175,7 +178,7 @@ const EmployerProfilePage = () => {
       icon: <Building2 className="w-4 h-4" />,
       label: "Company Name",
       name: "company_name",
-      value: editing ? draft.company_name : profile.company_name,
+      value: editing ? draft.company_name : serverProfile.company_name,
       editing,
       onChange: handleChange,
       error: errors.company_name,
@@ -184,7 +187,9 @@ const EmployerProfilePage = () => {
       icon: <Pencil className="w-4 h-4" />,
       label: "About",
       name: "company_description",
-      value: editing ? draft.company_description : profile.company_description,
+      value: editing
+        ? draft.company_description
+        : serverProfile.company_description,
       editing,
       onChange: handleChange,
       multiline: true,
@@ -194,7 +199,7 @@ const EmployerProfilePage = () => {
       icon: <Globe className="w-4 h-4" />,
       label: "Website",
       name: "website",
-      value: editing ? draft.website : profile.website,
+      value: editing ? draft.website : serverProfile.website,
       editing,
       onChange: handleChange,
       type: "url",
@@ -204,7 +209,7 @@ const EmployerProfilePage = () => {
       icon: <Mail className="w-4 h-4" />,
       label: "Contact Email",
       name: "contact_email",
-      value: editing ? draft.contact_email : profile.contact_email,
+      value: editing ? draft.contact_email : serverProfile.contact_email,
       editing,
       onChange: handleChange,
       type: "email",
@@ -214,7 +219,7 @@ const EmployerProfilePage = () => {
       icon: <Phone className="w-4 h-4" />,
       label: "Contact Phone",
       name: "contact_phone",
-      value: editing ? draft.contact_phone : profile.contact_phone,
+      value: editing ? draft.contact_phone : serverProfile.contact_phone,
       editing,
       onChange: handleChange,
       type: "tel",
@@ -224,7 +229,7 @@ const EmployerProfilePage = () => {
       icon: <MapPin className="w-4 h-4" />,
       label: "Location",
       name: "location",
-      value: editing ? draft.location : profile.location,
+      value: editing ? draft.location : serverProfile.location,
       editing,
       onChange: handleChange,
       error: errors.location,
@@ -237,18 +242,15 @@ const EmployerProfilePage = () => {
     if (!draft.company_name.trim()) {
       newErrors.company_name = "Company name is required";
     }
-
     if (!draft.location.trim()) {
       newErrors.location = "Location is required";
     }
-
     if (!draft.company_description.trim()) {
       newErrors.company_description =
         "Description must be at least 10 characters";
     }
 
     setErrors(newErrors);
-
     return Object.keys(newErrors).length === 0;
   };
 
@@ -300,11 +302,11 @@ const EmployerProfilePage = () => {
 
             <div>
               <h2 className="text-base font-semibold text-foreground">
-                {profile.company_name}
+                {serverProfile.company_name}
               </h2>
               <p className="text-sm text-muted-foreground flex items-center justify-center gap-1 mt-1">
                 <MapPin className="w-3.5 h-3.5 text-violet-400 shrink-0" />
-                {profile.location || "No location set"}
+                {serverProfile.location || "No location set"}
               </p>
             </div>
 

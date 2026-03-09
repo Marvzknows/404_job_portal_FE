@@ -1,4 +1,3 @@
-import UpdateEmployerProfile from "@/components/Employer/UpdateEmployerProfile";
 import api from "@/lib/axios";
 
 export const profileService = {

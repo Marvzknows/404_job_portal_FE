@@ -14,9 +14,8 @@ import JobDescriptionEditor from "./JobDescriptionEditor";
 import { useCreateJob } from "@/hooks/useJob";
 import { CreateJobFormT } from "@/services/job.service";
 import { toast } from "sonner";
-import { Loader2, UserCog, ArrowRight } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthProvider";
-import Link from "next/link";
 import UpdateEmployerProfile from "../UpdateEmployerProfile";
 
 const CreateJobForm = () => {
