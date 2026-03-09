@@ -20,6 +20,7 @@ import UpdateEmployerProfile from "../UpdateEmployerProfile";
 
 const CreateJobForm = () => {
   const { mutate: createJob, isPending } = useCreateJob();
+  const [resetKey, setResetKey] = useState(0);
   const { profile } = useAuth();
   const [form, setForm] = useState({
     title: "",
@@ -100,6 +101,7 @@ const CreateJobForm = () => {
           work_setup: "",
           job_type: "",
         });
+        setResetKey((k) => k + 1); // forces editor remount
       },
       onError: (error) => {
         toast.error("Error creating job: " + error.message);
@@ -208,6 +210,7 @@ const CreateJobForm = () => {
 
       <div className="space-y-1">
         <JobDescriptionEditor
+          key={resetKey}
           value={form.description}
           onChange={(val) => {
             setForm((prev) => ({ ...prev, description: val }));
