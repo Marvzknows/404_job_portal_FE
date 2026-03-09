@@ -13,6 +13,7 @@ import {
   Camera,
   Save,
   X,
+  Loader2,
 } from "lucide-react";
 import Image from "next/image";
 import FieldRow, {
@@ -20,10 +21,14 @@ import FieldRow, {
 } from "@/components/Employer/Profile/FieldRow";
 import { CompanyProfile, initialData } from "@/types/JobApplication";
 import { useAuth } from "@/context/AuthProvider";
-import { useEmployerProfile } from "@/hooks/useProfile";
+import {
+  useCreateEmployerProfile,
+  useEmployerProfile,
+} from "@/hooks/useProfile";
+import { toast } from "sonner";
 
 const EmployerProfilePage = () => {
-  const { profile: userProfile } = useAuth();
+  const { profile: userProfile, setProfile: setEmployerProfile } = useAuth();
   const [profile, setProfile] = useState<CompanyProfile>(initialData);
   const [draft, setDraft] = useState<CompanyProfile>(initialData);
   const [editing, setEditing] = useState(false);
@@ -33,9 +38,13 @@ const EmployerProfilePage = () => {
     Partial<Record<keyof CompanyProfile, string>>
   >({});
 
-  const { data: employerProfile } = useEmployerProfile(userProfile?.id, {
-    enabled: userProfile != null,
-  });
+  const { data: employerProfile, refetch: refetchEmployerProfile } =
+    useEmployerProfile(userProfile?.id, {
+      enabled: userProfile != null,
+    });
+
+  const { mutate: createEmployerProfile, isPending: isCreatingProfile } =
+    useCreateEmployerProfile();
 
   useEffect(() => {
     if (!employerProfile?.data) return;
@@ -75,9 +84,33 @@ const EmployerProfilePage = () => {
   const handleSave = () => {
     if (!validate()) return;
 
-    setEditing(false);
-    setLogoPreview(null);
-    console.log("Profile saved:", { ...draft });
+    const formData = new FormData();
+
+    formData.append("company_name", draft.company_name);
+    formData.append("company_description", draft.company_description);
+    formData.append("website", draft.website);
+    formData.append("contact_email", draft.contact_email);
+    formData.append("contact_phone", draft.contact_phone);
+    formData.append("location", draft.location);
+    const file = fileInputRef.current?.files?.[0];
+
+    if (file) {
+      formData.append("logo", file);
+    }
+    createEmployerProfile(formData, {
+      onSuccess: async () => {
+        setProfile(draft);
+        setEditing(false);
+        setLogoPreview(null);
+        toast.success("Profile created successfully!");
+      },
+      onError: (error) => {
+        toast.error(
+          error.response?.data?.message ||
+            "Failed to create profile. Please try again.",
+        );
+      },
+    });
   };
 
   const handleCancel = () => {
@@ -281,11 +314,15 @@ const EmployerProfilePage = () => {
                     </Button>
                     <Button
                       onClick={handleSave}
+                      disabled={isCreatingProfile}
                       size="sm"
                       className="gap-1.5 text-sm bg-violet-600 hover:bg-violet-700 text-white"
                     >
                       <Save className="w-3.5 h-3.5" />
-                      Save
+                      Save{" "}
+                      {isCreatingProfile && (
+                        <Loader2 className="animate-spin" />
+                      )}
                     </Button>
                   </div>
                 )}
