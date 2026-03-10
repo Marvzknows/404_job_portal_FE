@@ -29,7 +29,7 @@ export const useViewJobDetails = (jobId: string) => {
   });
 };
 
-export const updateEmployerJobListingStatus = () => {
+export const useUpdateEmployerJobListingStatus = () => {
   return useMutation<
     void,
     AxiosError<ApiErrorResponse>,

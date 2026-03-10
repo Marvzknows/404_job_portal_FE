@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { formatDate, formatToPesos } from "@/helpers/helpers";
 import {
-  updateEmployerJobListingStatus,
+  useUpdateEmployerJobListingStatus,
   useViewJobDetails,
 } from "@/hooks/useJob";
 import {
@@ -51,7 +51,7 @@ const ViewJobDetails = ({ id }: ViewJobDetailsProps) => {
   });
   const { data, isLoading, refetch } = useViewJobDetails(id);
   const { mutate: updateStatusMutation, isPending: isClosing } =
-    updateEmployerJobListingStatus();
+    useUpdateEmployerJobListingStatus();
   const job: JobDetailT | undefined = data?.data;
 
   if (isLoading) return <ViewJobDetailsSkeleton />;
