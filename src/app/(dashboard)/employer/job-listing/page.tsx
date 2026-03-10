@@ -15,7 +15,7 @@ const EmployerPageListing = () => {
   const [search, setSearch] = useState("");
   const [tableParams, setTableParams] = useState<EmployerJobListParamsT>({
     page: 1,
-    per_page: 2,
+    per_page: 6,
     sort_by: "created_at",
     sort_dir: "desc",
     job_type: "",
