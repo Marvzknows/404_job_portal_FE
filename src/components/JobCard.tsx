@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { Clock, MapPin, PhilippinePeso, User2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { formatToPesos } from "@/helpers/helpers";
+import { formatDate, formatToPesos } from "@/helpers/helpers";
+import { formattedLabel } from "@/types/JobListing";
 
 type JobCardProps = {
   title: string;
@@ -36,7 +37,8 @@ const JobCard = ({
               variant="outline"
               className="shrink-0 text-xs font-medium bg-violet-50 text-violet-700 border-violet-200"
             >
-              {jobType}
+              {formattedLabel[jobType as keyof typeof formattedLabel] ||
+                jobType}
             </Badge>
           </div>
 
@@ -55,7 +57,7 @@ const JobCard = ({
 
             <span className="flex items-center gap-1">
               <Clock className="w-3.5 h-3.5 text-violet-400" />
-              Posted {datePosted}
+              Posted {formatDate(datePosted)}
             </span>
           </div>
         </div>

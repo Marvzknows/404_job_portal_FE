@@ -30,4 +30,9 @@ export const jobService = {
     const res = await api.get("/employer/jobs/list", { params });
     return res.data;
   },
+
+  viewJobDetails: async (jobId: string) => {
+    const res = await api.get(`/employer/jobs/${jobId}`);
+    return res.data;
+  },
 };

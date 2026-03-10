@@ -69,7 +69,7 @@ const EmployerPageListing = () => {
               totalApplicants={job.total_applicants}
               maxSalary={job.salary.max}
               minSalary={job.salary.min}
-              href="/employer/dashboard"
+              href={`/employer/job-listing/${job.id}`}
             />
           ))}
         </div>

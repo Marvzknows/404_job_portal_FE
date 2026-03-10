@@ -178,7 +178,7 @@ const CreateJobForm = () => {
               <SelectValue placeholder="Select setup" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="onsite">On-site</SelectItem>
+              <SelectItem value="on_site">On-site</SelectItem>
               <SelectItem value="hybrid">Hybrid</SelectItem>
               <SelectItem value="remote">Remote</SelectItem>
             </SelectContent>
