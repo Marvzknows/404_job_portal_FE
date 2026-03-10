@@ -66,7 +66,7 @@ const EmployerPageListing = () => {
               jobType={job.job_type}
               location={job.location}
               datePosted={job.created_at}
-              totalApplicants={666}
+              totalApplicants={job.total_applicants}
               maxSalary={job.salary.max}
               minSalary={job.salary.min}
               href="/employer/dashboard"
