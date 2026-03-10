@@ -28,12 +28,15 @@ import Link from "next/link";
 import ViewJobDetailsSkeleton from "./ViewJobListing/ViewJobDetailsSkeleton";
 import InfoChip from "./ViewJobListing/InfoChip";
 import TiptapRenderer from "@/components/TiptapRenderer";
+import { useState } from "react";
+import AppAlertDialog from "@/components/AppAlertDialog";
 
 type ViewJobDetailsProps = {
   id: string;
 };
 
 const ViewJobDetails = ({ id }: ViewJobDetailsProps) => {
+  const [open, setOpen] = useState(false);
   const { data, isLoading } = useViewJobDetails(id);
   const job: JobDetailT | undefined = data?.data;
 
@@ -41,6 +44,11 @@ const ViewJobDetails = ({ id }: ViewJobDetailsProps) => {
   if (!job) return null;
 
   const { employer } = job;
+
+  const handleCloseListing = () => {
+    // Implement close listing functionality here
+    alert("Close listing functionality not implemented yet.");
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -106,6 +114,7 @@ const ViewJobDetails = ({ id }: ViewJobDetailsProps) => {
           <Button
             size="sm"
             variant="outline"
+            onClick={() => setOpen(true)}
             className="text-red-600 border-red-200 hover:bg-red-50"
           >
             Close listing
@@ -191,6 +200,17 @@ const ViewJobDetails = ({ id }: ViewJobDetailsProps) => {
           </div>
         </div>
       </div>
+
+      <AppAlertDialog
+        open={open}
+        onOpenChange={setOpen}
+        title="Close this listing?"
+        description="This will stop accepting new applicants."
+        confirmText="Yes, close it"
+        confirmVariant="destructive"
+        onConfirm={handleCloseListing}
+        onCancel={() => setOpen(false)}
+      />
     </div>
   );
 };
