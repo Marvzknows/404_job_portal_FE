@@ -4,7 +4,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { formatDate, formatToPesos } from "@/helpers/helpers";
-import { useViewJobDetails } from "@/hooks/useJob";
+import {
+  updateEmployerJobListingStatus,
+  useViewJobDetails,
+} from "@/hooks/useJob";
 import {
   formattedLabel,
   JobDetailT,
@@ -30,6 +33,8 @@ import InfoChip from "./ViewJobListing/InfoChip";
 import TiptapRenderer from "@/components/TiptapRenderer";
 import { useState } from "react";
 import AppAlertDialog from "@/components/AppAlertDialog";
+import { EmployerJobStatus } from "@/services/job.service";
+import { toast } from "sonner";
 
 type ViewJobDetailsProps = {
   id: string;
@@ -37,7 +42,16 @@ type ViewJobDetailsProps = {
 
 const ViewJobDetails = ({ id }: ViewJobDetailsProps) => {
   const [open, setOpen] = useState(false);
-  const { data, isLoading } = useViewJobDetails(id);
+  const [status, setStatus] = useState<EmployerJobStatus>("open");
+  const [dialogDetails, setDialogDetails] = useState({
+    title: "",
+    description: "",
+    confirmText: "",
+    confirmVariant: "",
+  });
+  const { data, isLoading, refetch } = useViewJobDetails(id);
+  const { mutate: updateStatusMutation, isPending: isClosing } =
+    updateEmployerJobListingStatus();
   const job: JobDetailT | undefined = data?.data;
 
   if (isLoading) return <ViewJobDetailsSkeleton />;
@@ -46,8 +60,37 @@ const ViewJobDetails = ({ id }: ViewJobDetailsProps) => {
   const { employer } = job;
 
   const handleCloseListing = () => {
-    // Implement close listing functionality here
-    alert("Close listing functionality not implemented yet.");
+    updateStatusMutation(
+      { jobId: id, status },
+      {
+        onSuccess: () => {
+          refetch();
+          toast.success(`Job successfully ${status}`);
+        },
+        onError: (err) => toast.error(err.message ?? "Closing job failed"),
+      },
+    );
+  };
+
+  const handleSelectStatus = (status: EmployerJobStatus) => {
+    setOpen(true);
+    if (status === "closed") {
+      setStatus("closed");
+      setDialogDetails({
+        title: "Close this listing?",
+        description: "This will stop accepting new applicants.",
+        confirmText: "Yes, close it",
+        confirmVariant: "destructive",
+      });
+    } else {
+      setStatus("open");
+      setDialogDetails({
+        title: "Open this listing?",
+        description: "This will open accepting new applicants.",
+        confirmText: "Yes, open it",
+        confirmVariant: "default",
+      });
+    }
   };
 
   return (
@@ -111,14 +154,27 @@ const ViewJobDetails = ({ id }: ViewJobDetailsProps) => {
           >
             <Link href={`/employer/jobs/${job.id}/edit`}>Edit listing</Link>
           </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setOpen(true)}
-            className="text-red-600 border-red-200 hover:bg-red-50"
-          >
-            Close listing
-          </Button>
+          {job.status == "closed" ? (
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={isClosing}
+              onClick={() => handleSelectStatus("open")}
+              className="text-violet-600 border-violet-200 hover:bg-violet-50 cursor-pointer"
+            >
+              Open listing
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={isClosing}
+              onClick={() => handleSelectStatus("closed")}
+              className="text-red-600 border-red-200 hover:bg-red-50 cursor-pointer"
+            >
+              Close listing
+            </Button>
+          )}
         </div>
       </div>
 
@@ -204,10 +260,14 @@ const ViewJobDetails = ({ id }: ViewJobDetailsProps) => {
       <AppAlertDialog
         open={open}
         onOpenChange={setOpen}
-        title="Close this listing?"
-        description="This will stop accepting new applicants."
-        confirmText="Yes, close it"
-        confirmVariant="destructive"
+        title={dialogDetails.title}
+        description={dialogDetails.description}
+        confirmText={dialogDetails.confirmText}
+        confirmVariant={
+          (dialogDetails.confirmVariant ?? "default") as
+            | "destructive"
+            | "default"
+        }
         onConfirm={handleCloseListing}
         onCancel={() => setOpen(false)}
       />

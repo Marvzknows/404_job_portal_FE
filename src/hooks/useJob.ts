@@ -2,6 +2,7 @@ import { ApiErrorResponse } from "@/lib/axios";
 import {
   CreateJobFormT,
   EmployerJobListParamsT,
+  EmployerJobStatus,
   jobService,
 } from "@/services/job.service";
 import { JobDetailResponseT, JobListingListT } from "@/types/JobListing";
@@ -25,5 +26,16 @@ export const useViewJobDetails = (jobId: string) => {
   return useQuery<JobDetailResponseT>({
     queryKey: ["viewJobDetails", jobId],
     queryFn: () => jobService.viewJobDetails(jobId),
+  });
+};
+
+export const updateEmployerJobListingStatus = () => {
+  return useMutation<
+    void,
+    AxiosError<ApiErrorResponse>,
+    { jobId: string; status: EmployerJobStatus }
+  >({
+    mutationFn: ({ jobId, status }) =>
+      jobService.updateEmployerJobListingStatusApi(jobId, status),
   });
 };
