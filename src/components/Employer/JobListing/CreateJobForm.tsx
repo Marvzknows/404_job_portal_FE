@@ -29,6 +29,7 @@ const CreateJobForm = () => {
     salary_max: "",
     work_setup: "",
     job_type: "",
+    location: "",
   });
 
   const [errors, setErrors] = useState<Partial<typeof form>>({});
@@ -75,6 +76,8 @@ const CreateJobForm = () => {
         "Maximum salary should be greater than minimum salary";
     }
 
+    if (!form.location.trim()) newErrors.location = "Location is required";
+
     setErrors(newErrors);
 
     return Object.keys(newErrors).length === 0;
@@ -100,6 +103,7 @@ const CreateJobForm = () => {
           salary_max: "",
           work_setup: "",
           job_type: "",
+          location: "",
         });
         setResetKey((k) => k + 1); // forces editor remount
       },
@@ -161,7 +165,7 @@ const CreateJobForm = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-1">
           <label className="text-sm font-medium">Work Setup</label>
           <Select
@@ -204,6 +208,19 @@ const CreateJobForm = () => {
           </Select>
           {errors.job_type && (
             <p className="text-red-500 text-sm">{errors.job_type}</p>
+          )}
+        </div>
+        <div className="space-y-1">
+          <label className="text-sm font-medium">Location</label>
+          <Input
+            name="location"
+            placeholder="e.g. Manila, Philippines"
+            value={form.location}
+            onChange={handleChange}
+            className={errors.location ? "border-red-500" : ""}
+          />
+          {errors.location && (
+            <p className="text-red-500 text-sm">{errors.location}</p>
           )}
         </div>
       </div>

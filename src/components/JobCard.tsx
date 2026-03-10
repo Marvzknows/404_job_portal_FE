@@ -25,37 +25,39 @@ const JobCard = ({
   href,
 }: JobCardProps) => {
   return (
-    <Link href={href} className="block group">
-      <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm hover:border-violet-200 hover:shadow-md transition-all duration-200">
-        <div className="flex items-start justify-between gap-3">
-          <h2 className="text-sm font-semibold text-foreground leading-snug">
-            {title}
-          </h2>
-          <Badge
-            variant="outline"
-            className="shrink-0 text-xs font-medium bg-violet-50 text-violet-700 border-violet-200"
-          >
-            {jobType}
-          </Badge>
-        </div>
+    <Link href={href} className="block group h-full">
+      <div className="h-full flex flex-col bg-white rounded-xl border border-gray-100 p-4 shadow-sm hover:border-violet-200 hover:shadow-md transition-all duration-200">
+        <div className="flex-1">
+          <div className="flex items-start justify-between gap-3">
+            <h2 className="text-sm font-semibold text-foreground leading-snug">
+              {title}
+            </h2>
+            <Badge
+              variant="outline"
+              className="shrink-0 text-xs font-medium bg-violet-50 text-violet-700 border-violet-200"
+            >
+              {jobType}
+            </Badge>
+          </div>
 
-        <div className="flex flex-wrap gap-x-3 gap-y-1.5 mt-3 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1">
-            <MapPin className="w-3.5 h-3.5 text-violet-400" />
-            {location}
-          </span>
-
-          {minSalary && maxSalary && (
+          <div className="flex flex-wrap gap-x-3 gap-y-1.5 mt-3 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
-              <PhilippinePeso className="w-3.5 h-3.5 text-violet-400" />
-              {formatToPesos(minSalary)} – {formatToPesos(maxSalary)}
+              <MapPin className="w-3.5 h-3.5 text-violet-400" />
+              {location}
             </span>
-          )}
 
-          <span className="flex items-center gap-1">
-            <Clock className="w-3.5 h-3.5 text-violet-400" />
-            Posted {datePosted}
-          </span>
+            {minSalary && maxSalary && (
+              <span className="flex items-center gap-1">
+                <PhilippinePeso className="w-3.5 h-3.5 text-violet-400" />
+                {formatToPesos(minSalary)} – {formatToPesos(maxSalary)}
+              </span>
+            )}
+
+            <span className="flex items-center gap-1">
+              <Clock className="w-3.5 h-3.5 text-violet-400" />
+              Posted {datePosted}
+            </span>
+          </div>
         </div>
 
         <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-50">
