@@ -48,6 +48,7 @@ const UpdateJobPage = ({ id }: { id: string }) => {
   // Populate form once job data loads
   useEffect(() => {
     if (!job) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setForm({
       title: job.title,
       description: job.description ?? "",
