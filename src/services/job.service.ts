@@ -45,4 +45,12 @@ export const jobService = {
     const res = await api.put(`/employer/jobs/${jobId}/status`, { status });
     return res.data;
   },
+
+  updateJobListingDetailsApi: async (
+    jobId: string,
+    payload: CreateJobFormT,
+  ) => {
+    const res = await api.put(`/employer/jobs/${jobId}`, payload);
+    return res.data;
+  },
 };

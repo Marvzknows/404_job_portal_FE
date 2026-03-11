@@ -9,6 +9,11 @@ import { JobDetailResponseT, JobListingListT } from "@/types/JobListing";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 
+export type UpdateJobVariables = {
+  jobId: string;
+  payload: CreateJobFormT;
+};
+
 export const useCreateJob = () => {
   return useMutation<void, AxiosError<ApiErrorResponse>, CreateJobFormT>({
     mutationFn: jobService.createJob,
@@ -37,5 +42,12 @@ export const useUpdateEmployerJobListingStatus = () => {
   >({
     mutationFn: ({ jobId, status }) =>
       jobService.updateEmployerJobListingStatusApi(jobId, status),
+  });
+};
+
+export const useUpdateJobDetails = () => {
+  return useMutation<void, AxiosError<ApiErrorResponse>, UpdateJobVariables>({
+    mutationFn: ({ jobId, payload }) =>
+      jobService.updateJobListingDetailsApi(jobId, payload),
   });
 };

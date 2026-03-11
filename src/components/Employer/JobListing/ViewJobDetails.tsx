@@ -152,7 +152,9 @@ const ViewJobDetails = ({ id }: ViewJobDetailsProps) => {
             className="bg-violet-600 hover:bg-violet-700 text-white"
             asChild
           >
-            <Link href={`/employer/jobs/${job.id}/edit`}>Edit listing</Link>
+            <Link href={`/employer/job-listing/${job.id}/update`}>
+              Edit listing
+            </Link>
           </Button>
           {job.status == "closed" ? (
             <Button

@@ -104,8 +104,8 @@ export type JobDetailT = {
   status: "open" | "closed" | "draft";
   salary_min: string;
   salary_max: string;
-  work_setup: "onsite" | "remote" | "hybrid";
-  job_type: "full-time" | "part-time" | "contract" | "internship";
+  work_setup: "on_site" | "remote" | "hybrid";
+  job_type: "full_time" | "part_time" | "contract" | "internship";
   location: string;
   created_at: string;
   updated_at: string;
