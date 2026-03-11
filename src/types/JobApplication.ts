@@ -1,4 +1,5 @@
 import { FilesT } from "./files";
+import { ApiPaginatedResponse, PaginatedData } from "./Pagination";
 
 export type ApplicationListT = {
   id: string;
@@ -51,3 +52,27 @@ export const initialData: CompanyProfile = {
   location: "",
   logo: null,
 };
+
+export type JobApplicationListT = {
+  id: string;
+  job_seeker_id: string;
+  job_listing_id: string;
+  resume_id: string;
+  status: ApplicationStatusT;
+  cover_letter: string;
+  date_applied: string;
+  job_listing: {
+    id: string;
+    title: string;
+  };
+  job_seeker: {
+    id: string;
+    full_name: string;
+    email: string;
+    current_job_title: string;
+    avatar_url: string | null;
+  };
+};
+
+export type PaginatedJobApplicationListT =
+  ApiPaginatedResponse<JobApplicationListT>;
