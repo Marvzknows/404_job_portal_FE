@@ -29,12 +29,16 @@ import {
 import Link from "next/link";
 import { formatDate, formatSalary } from "@/helpers/helpers";
 import ViewApplicationSkeleton from "./ViewApplicationSkeleton ";
-import { useGetJobApplication } from "@/hooks/useJobApplication";
+import {
+  useGetJobApplication,
+  useUpdateApplicationStatus,
+} from "@/hooks/useJobApplication";
 import { formattedLabel, STATUS_STYLES } from "@/types/JobListing";
 import {
   ApplicationStatusT,
   JOB_APPLICATION_STATUS_STYLESR,
 } from "@/types/JobApplication";
+import { toast } from "sonner";
 
 const statusActions: {
   value: ApplicationStatusT;
@@ -72,16 +76,12 @@ const statusActions: {
     icon: XCircle,
     class: "text-red-600",
   },
-  {
-    value: "withdrawn",
-    label: "Mark as Withdrawn",
-    icon: XCircle,
-    class: "text-gray-600",
-  },
 ];
 
 const ViewApplicationPage = ({ id }: { id: string }) => {
-  const { data, isLoading } = useGetJobApplication(id);
+  const { data, isLoading, refetch } = useGetJobApplication(id);
+  const { mutate: updateAction, isPending } = useUpdateApplicationStatus();
+
   const currentStatus = data?.data?.status as ApplicationStatusT | undefined;
 
   const initials = data?.data?.job_seeker?.user?.full_name
@@ -90,7 +90,20 @@ const ViewApplicationPage = ({ id }: { id: string }) => {
     .join("");
 
   const handleStatusUpdate = (newStatus: ApplicationStatusT) => {
-    alert("Updating status to:" + newStatus);
+    updateAction(
+      {
+        applicationId: id,
+        status: newStatus,
+      },
+      {
+        onSuccess: () => {
+          refetch();
+          toast.success("Application status updated");
+        },
+        onError: (err) =>
+          toast.error(err.message || "Updating application status failed"),
+      },
+    );
   };
 
   return (
@@ -162,6 +175,7 @@ const ViewApplicationPage = ({ id }: { id: string }) => {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
+                    disabled={isPending}
                     variant="outline"
                     size="sm"
                     className="gap-1.5 text-sm border-violet-200 text-violet-700 hover:bg-violet-50 hover:text-violet-800"
