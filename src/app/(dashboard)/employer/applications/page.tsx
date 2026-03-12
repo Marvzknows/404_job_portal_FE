@@ -8,6 +8,7 @@ import { useGetJobApplicationList } from "@/hooks/useJobApplication";
 import { useState } from "react";
 import { JobApplicationListParamsT } from "@/services/jobApplication.service";
 import useDebounce from "@/hooks/useDebounce";
+import PaginationComponent from "@/components/PaginationComponent";
 
 const EmployerApplicationsPage = () => {
   const [search, setSearch] = useState("");
@@ -56,6 +57,14 @@ const EmployerApplicationsPage = () => {
         caption="A list of your applicants."
         footer={undefined}
       />
+
+      {/* pagination */}
+      {data?.data.meta && !isLoading && (
+        <PaginationComponent
+          meta={data.data.meta}
+          onPageChange={(page) => setParams((prev) => ({ ...prev, page }))}
+        />
+      )}
     </div>
   );
 };

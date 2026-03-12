@@ -1,5 +1,5 @@
 import { FilesT } from "./files";
-import { ApiPaginatedResponse, PaginatedData } from "./Pagination";
+import { ApiPaginatedResponse } from "./Pagination";
 
 export type ApplicationListT = {
   id: string;

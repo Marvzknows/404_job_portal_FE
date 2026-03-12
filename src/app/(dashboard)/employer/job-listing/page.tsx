@@ -4,7 +4,7 @@ import EmployerJobListingHeader from "@/components/Employer/JobListing/EmployerJ
 import EmployerSearchFilter from "@/components/Employer/JobListing/EmployerSearchFilter";
 import EmployerJobListingSkeleton from "@/components/Employer/JobListing/EmployerJobListingSkeleton";
 import JobCard from "@/components/JobCard";
-import PaginationComponent from "@/components/Pagination";
+import PaginationComponent from "@/components/PaginationComponent";
 import useDebounce from "@/hooks/useDebounce";
 import { useEmployerJobList } from "@/hooks/useJob";
 import { EmployerJobListParamsT } from "@/services/job.service";
