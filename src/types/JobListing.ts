@@ -54,6 +54,13 @@ export const formattedLabel = {
   part_time: "Part-time",
   contract: "Contract",
   internship: "Internship",
+  // Job Application
+  pending: "Pending",
+  viewed: "Viewed",
+  withdrawn: "Withdrawn",
+  shortlisted: "Shortlisted",
+  accepted: "Accepted",
+  rejected: "Rejected",
 };
 
 export type JobDetailsLogoT = {

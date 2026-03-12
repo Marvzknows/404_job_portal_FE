@@ -12,4 +12,9 @@ export const jobApplicationService = {
     const res = await api.get(`/job-application`, { params });
     return res.data;
   },
+
+  getJobApplicationApi: async (jobId: string) => {
+    const rest = await api.get(`job-application/${jobId}`);
+    return rest.data;
+  },
 };

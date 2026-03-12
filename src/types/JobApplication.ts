@@ -1,4 +1,6 @@
+import { UserT } from "./auth";
 import { FilesT } from "./files";
+import { JobDetailT } from "./JobListing";
 import { ApiPaginatedResponse } from "./Pagination";
 
 export type ApplicationListT = {
@@ -18,6 +20,18 @@ export type ApplicationStatusT =
   | "shortlisted"
   | "accepted"
   | "rejected";
+
+export const JOB_APPLICATION_STATUS_STYLESR: Record<
+  ApplicationStatusT,
+  string
+> = {
+  pending: "bg-yellow-50 text-yellow-700 border-yellow-200",
+  viewed: "bg-blue-50 text-blue-700 border-blue-200",
+  withdrawn: "bg-gray-50 text-gray-600 border-gray-200",
+  shortlisted: "bg-purple-50 text-purple-700 border-purple-200",
+  accepted: "bg-green-50 text-green-700 border-green-200",
+  rejected: "bg-red-50 text-red-700 border-red-200",
+};
 
 export type CompanyLogo = {
   id: number;
@@ -76,3 +90,25 @@ export type JobApplicationListT = {
 
 export type PaginatedJobApplicationListT =
   ApiPaginatedResponse<JobApplicationListT>;
+
+export type ShowJobApplicationT = {
+  success: boolean;
+  message: string;
+  data: {
+    id: string;
+    status: ApplicationStatusT;
+    cover_letter: string;
+    applied_at: string;
+    resume: FilesT;
+    job_seeker: {
+      id: string;
+      bio: string;
+      portfolio: string;
+      job_title: string;
+      phone: string;
+      location: string;
+      user: UserT;
+    };
+    job_listing: JobDetailT;
+  };
+};
