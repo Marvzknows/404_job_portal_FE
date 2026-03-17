@@ -1,3 +1,8 @@
+import { UserT } from "./auth";
+import { FilesT } from "./files";
+import { JobDetailT } from "./JobListing";
+import { ApiPaginatedResponse } from "./Pagination";
+
 export type ApplicationListT = {
   id: string;
   avatarUrl: string;
@@ -16,6 +21,18 @@ export type ApplicationStatusT =
   | "accepted"
   | "rejected";
 
+export const JOB_APPLICATION_STATUS_STYLESR: Record<
+  ApplicationStatusT,
+  string
+> = {
+  pending: "bg-yellow-50 text-yellow-700 border-yellow-200",
+  viewed: "bg-blue-50 text-blue-700 border-blue-200",
+  withdrawn: "bg-gray-50 text-gray-600 border-gray-200",
+  shortlisted: "bg-purple-50 text-purple-700 border-purple-200",
+  accepted: "bg-green-50 text-green-700 border-green-200",
+  rejected: "bg-red-50 text-red-700 border-red-200",
+};
+
 export type CompanyLogo = {
   id: number;
   file_name: string;
@@ -31,35 +48,67 @@ export type CompanyLogo = {
 };
 
 export type CompanyProfile = {
-  id: number;
   company_name: string;
   company_description: string;
   website: string;
   contact_email: string;
   contact_phone: string;
   location: string;
-  logo: CompanyLogo | null;
+  logo: FilesT | null;
 };
 
 export const initialData: CompanyProfile = {
-  id: 2,
-  company_name: "Philadelphia 76ers",
-  company_description: "medyo basketbol player",
-  website: "https://github.com/",
-  contact_email: "ai@gmail.com",
-  contact_phone: "09182455347",
-  location: "USA America",
-  logo: {
-    id: 3,
-    file_name: "1771393666_699552827c0df.png",
-    file_path: "fileUploads/1771393666_699552827c0df.png",
-    file_size: "713797",
-    url: "http://127.0.0.1:8000/storage/fileUploads/1771393666_699552827c0df.png",
-    uploaded_by: {
-      id: 3,
-      first_name: "Allen",
-      last_name: "Iverson",
-      full_name: "Allen Iverson",
-    },
-  },
+  company_name: "",
+  company_description: "",
+  website: "",
+  contact_email: "",
+  contact_phone: "",
+  location: "",
+  logo: null,
+};
+
+export type JobApplicationListT = {
+  id: string;
+  job_seeker_id: string;
+  job_listing_id: string;
+  resume_id: string;
+  status: ApplicationStatusT;
+  cover_letter: string;
+  date_applied: string;
+  job_listing: {
+    id: string;
+    title: string;
+  };
+  job_seeker: {
+    id: string;
+    full_name: string;
+    email: string;
+    current_job_title: string;
+    avatar_url: string | null;
+  };
+};
+
+export type PaginatedJobApplicationListT =
+  ApiPaginatedResponse<JobApplicationListT>;
+
+export type ShowJobApplicationT = {
+  success: boolean;
+  message: string;
+  data: {
+    id: string;
+    status: ApplicationStatusT;
+    cover_letter: string;
+    applied_at: string;
+    resume: FilesT;
+    job_seeker: {
+      id: string;
+      bio: string;
+      portfolio: string;
+      job_title: string;
+      phone: string;
+      location: string;
+      user: UserT;
+    };
+    job_listing: JobDetailT;
+  };
 };

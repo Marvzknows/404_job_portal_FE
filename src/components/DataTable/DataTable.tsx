@@ -33,6 +33,8 @@ type DataTableProps<T> = {
   caption?: string;
   footer?: FooterCell[];
   emptyMessage?: string;
+  loading?: boolean;
+  loadingRows?: number;
 };
 
 export type HeaderType<T> = {
@@ -42,12 +44,22 @@ export type HeaderType<T> = {
   render?: (row: T) => React.ReactNode;
 };
 
+function SkeletonCell({ className }: { className?: string }) {
+  return (
+    <TableCell className={`p-6 ${className ?? ""}`}>
+      <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4" />
+    </TableCell>
+  );
+}
+
 function DataTable<T>({
   data,
   columns,
   caption,
   footer,
   emptyMessage = "No data available.",
+  loading = false,
+  loadingRows = 5,
 }: DataTableProps<T>) {
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
@@ -59,16 +71,35 @@ function DataTable<T>({
             {columns.map((col) => (
               <TableHead
                 key={String(col.key)}
-                className={`p-6 text-xs font-semibold text-gray-500 uppercase tracking-wider  ${col.className ?? ""}`}
+                className={`p-6 text-xs font-semibold text-gray-500 uppercase tracking-wider ${col.className ?? ""}`}
               >
-                {col.label}
+                {loading ? (
+                  <div className="h-3 bg-gray-300 rounded animate-pulse w-16" />
+                ) : (
+                  col.label
+                )}
               </TableHead>
             ))}
           </TableRow>
         </TableHeader>
 
         <TableBody>
-          {data.length === 0 ? (
+          {loading ? (
+            Array.from({ length: loadingRows }).map((_, rowIndex) => (
+              <TableRow
+                key={rowIndex}
+                className="border-b border-gray-100"
+                style={{ animationDelay: `${rowIndex * 60}ms` }}
+              >
+                {columns.map((col) => (
+                  <SkeletonCell
+                    key={String(col.key)}
+                    className={col.className}
+                  />
+                ))}
+              </TableRow>
+            ))
+          ) : data.length === 0 ? (
             <TableRow>
               <TableCell
                 colSpan={columns.length}
@@ -98,7 +129,7 @@ function DataTable<T>({
           )}
         </TableBody>
 
-        {footer && footer.length > 0 && (
+        {!loading && footer && footer.length > 0 && (
           <TableFooter>
             <TableRow>
               {footer.map((cell, i) => (

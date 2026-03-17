@@ -2,7 +2,7 @@
 
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import {
   Building2,
   Globe,
@@ -13,25 +13,79 @@ import {
   Camera,
   Save,
   X,
+  Loader2,
 } from "lucide-react";
 import Image from "next/image";
 import FieldRow, {
   FieldRowProps,
 } from "@/components/Employer/Profile/FieldRow";
 import { CompanyProfile, initialData } from "@/types/JobApplication";
+import { useAuth } from "@/context/AuthProvider";
+import {
+  useCreateEmployerProfile,
+  useEmployerProfile,
+  useUpdateEmployerProfile,
+} from "@/hooks/useProfile";
+import { toast } from "sonner";
 
 const EmployerProfilePage = () => {
-  const [profile, setProfile] = useState<CompanyProfile>(initialData);
+  const { profile: userProfile } = useAuth();
+  const [createdProfileId, setCreatedProfileId] = useState<
+    number | undefined
+  >();
+  const profileId = createdProfileId ?? userProfile?.id;
   const [draft, setDraft] = useState<CompanyProfile>(initialData);
   const [editing, setEditing] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof CompanyProfile, string>>
+  >({});
+
+  const { data: employerProfile, refetch: refetchEmployerProfile } =
+    useEmployerProfile(profileId, {
+      enabled: profileId != null,
+    });
+
+  const serverProfile = useMemo<CompanyProfile>(() => {
+    const data = employerProfile?.data;
+    if (!data) return initialData;
+    return {
+      company_name: data.company_name ?? "",
+      company_description: data.company_description ?? "",
+      website: data.website ?? "",
+      contact_email: data.contact_email ?? "",
+      contact_phone: data.contact_phone ?? "",
+      location: data.location ?? "",
+      logo: data.logo ?? null,
+    };
+  }, [employerProfile]);
+
+  // Reset draft to latest server data when it changes (only while not editing).
+  // setState during render (outside effects) is the React-approved pattern for derived state.
+  const [prevServerProfile, setPrevServerProfile] = useState(serverProfile);
+
+  if (prevServerProfile !== serverProfile && !editing) {
+    setPrevServerProfile(serverProfile);
+    setDraft(serverProfile);
+  }
+
+  // #region Mutations
+  const { mutate: createEmployerProfile, isPending: isCreatingProfile } =
+    useCreateEmployerProfile();
+
+  const { mutate: updateEmployerProfile, isPending: isUpdatingProfile } =
+    useUpdateEmployerProfile(profileId ?? 0);
+  // #endregion
+
+  const isPending = isCreatingProfile || isUpdatingProfile;
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setDraft((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,19 +95,78 @@ const EmployerProfilePage = () => {
   };
 
   const handleSave = () => {
-    setProfile({ ...draft });
-    setEditing(false);
-    setLogoPreview(null);
+    if (!validate()) return;
+
+    const file = fileInputRef.current?.files?.[0];
+
+    if (profileId) {
+      const profileFormData = new FormData();
+      profileFormData.append("company_name", draft.company_name);
+      profileFormData.append("company_description", draft.company_description);
+      profileFormData.append("website", draft.website);
+      profileFormData.append("contact_email", draft.contact_email);
+      profileFormData.append("contact_phone", draft.contact_phone);
+      profileFormData.append("location", draft.location);
+
+      if (file) {
+        profileFormData.append("logo", file);
+      }
+
+      updateEmployerProfile(profileFormData, {
+        onSuccess: () => {
+          refetchEmployerProfile();
+          setLogoPreview(null);
+          if (fileInputRef.current) fileInputRef.current.value = "";
+          setEditing(false);
+          toast.success("Profile updated successfully!");
+        },
+        onError: (error) => {
+          toast.error(
+            error.response?.data?.message ||
+              "Failed to update profile. Please try again.",
+          );
+        },
+      });
+      return;
+    }
+
+    // No profile ID means create new profile
+    const formData = new FormData();
+    formData.append("company_name", draft.company_name);
+    formData.append("company_description", draft.company_description);
+    formData.append("website", draft.website);
+    formData.append("contact_email", draft.contact_email);
+    formData.append("contact_phone", draft.contact_phone);
+    formData.append("location", draft.location);
+    if (file) formData.append("logo", file);
+
+    createEmployerProfile(formData, {
+      onSuccess: (res) => {
+        setCreatedProfileId(res.data.id);
+        setEditing(false);
+        setLogoPreview(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+        toast.success("Profile created successfully!");
+      },
+      onError: (error) => {
+        toast.error(
+          error.response?.data?.message ||
+            "Failed to create profile. Please try again.",
+        );
+      },
+    });
   };
 
   const handleCancel = () => {
-    setDraft({ ...profile });
+    setDraft({ ...serverProfile });
     setEditing(false);
     setLogoPreview(null);
   };
 
-  const logoSrc = logoPreview ?? profile.logo?.url ?? null;
-  const initials = profile.company_name
+  // logoPreview (new file selected) > saved logo URL > null (show initials)
+  const logoSrc = logoPreview ?? serverProfile.logo?.url ?? null;
+
+  const initials = serverProfile.company_name
     .split(" ")
     .map((w) => w[0])
     .join("")
@@ -65,55 +178,81 @@ const EmployerProfilePage = () => {
       icon: <Building2 className="w-4 h-4" />,
       label: "Company Name",
       name: "company_name",
-      value: editing ? draft.company_name : profile.company_name,
+      value: editing ? draft.company_name : serverProfile.company_name,
       editing,
       onChange: handleChange,
+      error: errors.company_name,
     },
     {
       icon: <Pencil className="w-4 h-4" />,
       label: "About",
       name: "company_description",
-      value: editing ? draft.company_description : profile.company_description,
+      value: editing
+        ? draft.company_description
+        : serverProfile.company_description,
       editing,
       onChange: handleChange,
       multiline: true,
+      error: errors.company_description,
     },
     {
       icon: <Globe className="w-4 h-4" />,
       label: "Website",
       name: "website",
-      value: editing ? draft.website : profile.website,
+      value: editing ? draft.website : serverProfile.website,
       editing,
       onChange: handleChange,
       type: "url",
+      error: errors.website,
     },
     {
       icon: <Mail className="w-4 h-4" />,
       label: "Contact Email",
       name: "contact_email",
-      value: editing ? draft.contact_email : profile.contact_email,
+      value: editing ? draft.contact_email : serverProfile.contact_email,
       editing,
       onChange: handleChange,
       type: "email",
+      error: errors.contact_email,
     },
     {
       icon: <Phone className="w-4 h-4" />,
       label: "Contact Phone",
       name: "contact_phone",
-      value: editing ? draft.contact_phone : profile.contact_phone,
+      value: editing ? draft.contact_phone : serverProfile.contact_phone,
       editing,
       onChange: handleChange,
       type: "tel",
+      error: errors.contact_phone,
     },
     {
       icon: <MapPin className="w-4 h-4" />,
       label: "Location",
       name: "location",
-      value: editing ? draft.location : profile.location,
+      value: editing ? draft.location : serverProfile.location,
       editing,
       onChange: handleChange,
+      error: errors.location,
     },
   ];
+
+  const validate = () => {
+    const newErrors: Partial<Record<keyof CompanyProfile, string>> = {};
+
+    if (!draft.company_name.trim()) {
+      newErrors.company_name = "Company name is required";
+    }
+    if (!draft.location.trim()) {
+      newErrors.location = "Location is required";
+    }
+    if (!draft.company_description.trim()) {
+      newErrors.company_description =
+        "Description must be at least 10 characters";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -163,11 +302,11 @@ const EmployerProfilePage = () => {
 
             <div>
               <h2 className="text-base font-semibold text-foreground">
-                {profile.company_name}
+                {serverProfile.company_name}
               </h2>
               <p className="text-sm text-muted-foreground flex items-center justify-center gap-1 mt-1">
                 <MapPin className="w-3.5 h-3.5 text-violet-400 shrink-0" />
-                {profile.location || "No location set"}
+                {serverProfile.location || "No location set"}
               </p>
             </div>
 
@@ -218,11 +357,12 @@ const EmployerProfilePage = () => {
                     </Button>
                     <Button
                       onClick={handleSave}
+                      disabled={isPending}
                       size="sm"
                       className="gap-1.5 text-sm bg-violet-600 hover:bg-violet-700 text-white"
                     >
                       <Save className="w-3.5 h-3.5" />
-                      Save
+                      Save {isPending && <Loader2 className="animate-spin" />}
                     </Button>
                   </div>
                 )}

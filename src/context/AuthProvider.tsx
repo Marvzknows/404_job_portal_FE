@@ -3,7 +3,7 @@ import { useContext, useState } from "react";
 import { AuthContext } from "./AuthContext";
 import { UserT } from "@/types/auth";
 import { JobSeekerProfileT } from "@/types/JobSeeker";
-import { EmployerProfileT } from "@/types/Employer";
+import { EmployerProfileDataT } from "@/types/Employer";
 
 type AuthProviderTypes = {
   children: React.ReactNode;
@@ -12,7 +12,7 @@ export const AuthProvider = ({ children }: AuthProviderTypes) => {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<UserT | null>(null);
   const [profile, setProfile] = useState<
-    EmployerProfileT | JobSeekerProfileT | null
+    EmployerProfileDataT | JobSeekerProfileT | null
   >(null);
 
   return (

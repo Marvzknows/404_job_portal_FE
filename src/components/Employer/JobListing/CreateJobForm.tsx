@@ -15,9 +15,13 @@ import { useCreateJob } from "@/hooks/useJob";
 import { CreateJobFormT } from "@/services/job.service";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { useAuth } from "@/context/AuthProvider";
+import UpdateEmployerProfile from "../UpdateEmployerProfile";
 
 const CreateJobForm = () => {
   const { mutate: createJob, isPending } = useCreateJob();
+  const [resetKey, setResetKey] = useState(0);
+  const { profile } = useAuth();
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -25,6 +29,7 @@ const CreateJobForm = () => {
     salary_max: "",
     work_setup: "",
     job_type: "",
+    location: "",
   });
 
   const [errors, setErrors] = useState<Partial<typeof form>>({});
@@ -45,14 +50,12 @@ const CreateJobForm = () => {
   const validate = () => {
     const newErrors: Partial<typeof form> = {};
 
-    // Required fields
     if (!form.title.trim()) newErrors.title = "Job title is required";
     if (!form.description.trim())
       newErrors.description = "Description is required";
     if (!form.work_setup) newErrors.work_setup = "Work setup is required";
     if (!form.job_type) newErrors.job_type = "Job type is required";
 
-    // Salary validations
     const minSalary = Number(form.salary_min);
     const maxSalary = Number(form.salary_max);
 
@@ -72,6 +75,8 @@ const CreateJobForm = () => {
       newErrors.salary_max =
         "Maximum salary should be greater than minimum salary";
     }
+
+    if (!form.location.trim()) newErrors.location = "Location is required";
 
     setErrors(newErrors);
 
@@ -98,13 +103,19 @@ const CreateJobForm = () => {
           salary_max: "",
           work_setup: "",
           job_type: "",
+          location: "",
         });
+        setResetKey((k) => k + 1); // forces editor remount
       },
       onError: (error) => {
         toast.error("Error creating job: " + error.message);
       },
     });
   };
+
+  if (!profile) {
+    return <UpdateEmployerProfile />;
+  }
 
   return (
     <form
@@ -154,7 +165,7 @@ const CreateJobForm = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-1">
           <label className="text-sm font-medium">Work Setup</label>
           <Select
@@ -167,7 +178,7 @@ const CreateJobForm = () => {
               <SelectValue placeholder="Select setup" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="onsite">On-site</SelectItem>
+              <SelectItem value="on_site">On-site</SelectItem>
               <SelectItem value="hybrid">Hybrid</SelectItem>
               <SelectItem value="remote">Remote</SelectItem>
             </SelectContent>
@@ -192,17 +203,31 @@ const CreateJobForm = () => {
               <SelectItem value="full_time">Full Time</SelectItem>
               <SelectItem value="part_time">Part Time</SelectItem>
               <SelectItem value="contract">Contract</SelectItem>
-              <SelectItem value="freelance">Freelance</SelectItem>
+              <SelectItem value="internship">Internship</SelectItem>
             </SelectContent>
           </Select>
           {errors.job_type && (
             <p className="text-red-500 text-sm">{errors.job_type}</p>
           )}
         </div>
+        <div className="space-y-1">
+          <label className="text-sm font-medium">Location</label>
+          <Input
+            name="location"
+            placeholder="e.g. Manila, Philippines"
+            value={form.location}
+            onChange={handleChange}
+            className={errors.location ? "border-red-500" : ""}
+          />
+          {errors.location && (
+            <p className="text-red-500 text-sm">{errors.location}</p>
+          )}
+        </div>
       </div>
 
       <div className="space-y-1">
         <JobDescriptionEditor
+          key={resetKey}
           value={form.description}
           onChange={(val) => {
             setForm((prev) => ({ ...prev, description: val }));

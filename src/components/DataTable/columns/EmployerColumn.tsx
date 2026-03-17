@@ -2,17 +2,16 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { User } from "lucide-react";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, User } from "lucide-react";
-import { ApplicationListT, ApplicationStatusT } from "@/types/JobApplication";
+  ApplicationListT,
+  ApplicationStatusT,
+  JobApplicationListT,
+} from "@/types/JobApplication";
 import { HeaderType } from "../DataTable";
 import Image from "next/image";
 import Link from "next/link";
+import { formatDate } from "@/helpers/helpers";
 
 const statusConfig: Record<
   ApplicationStatusT,
@@ -67,7 +66,7 @@ const CandidateAvatar = ({ src, name }: { src?: string; name: string }) => {
 };
 
 export const EmployerJobApplicationColumn =
-  (): HeaderType<ApplicationListT>[] => {
+  (): HeaderType<JobApplicationListT>[] => {
     return [
       {
         key: "candidateName",
@@ -75,12 +74,17 @@ export const EmployerJobApplicationColumn =
         className: "min-w-[220px]",
         render: (row) => (
           <div className="flex items-center gap-3">
-            <CandidateAvatar src={row.avatarUrl} name={row.applicantName} />
+            <CandidateAvatar
+              src={row.job_seeker.avatar_url ?? ""}
+              name={row.job_seeker.full_name}
+            />
             <div className="flex flex-col">
               <span className="text-sm font-semibold text-gray-800 leading-tight">
-                {row.applicantName}
+                {row.job_seeker.full_name}
               </span>
-              <span className="text-xs text-gray-400 mt-0.5">{row.email}</span>
+              <span className="text-xs text-gray-400 mt-0.5">
+                {row.job_seeker.email}
+              </span>
             </div>
           </div>
         ),
@@ -90,7 +94,7 @@ export const EmployerJobApplicationColumn =
         label: "Job Position",
         className: "min-w-[180px]",
         render: (row) => (
-          <span className="text-sm text-gray-600">{row.jobTitle}</span>
+          <span className="text-sm text-gray-600">{row.job_listing.title}</span>
         ),
       },
       {
@@ -98,7 +102,9 @@ export const EmployerJobApplicationColumn =
         label: "Applied Date",
         className: "min-w-[120px]",
         render: (row) => (
-          <span className="text-sm text-gray-500">{row.appliedDate}</span>
+          <span className="text-sm text-gray-500">
+            {formatDate(row.date_applied)}
+          </span>
         ),
       },
       {
@@ -131,41 +137,6 @@ export const EmployerJobApplicationColumn =
                 View
               </Button>
             </Link>
-            <Button
-              size="sm"
-              className="h-8 px-4 text-xs font-medium bg-green-500 hover:bg-green-600 text-white rounded-md"
-            >
-              Shortlist
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md"
-                >
-                  <MoreHorizontal className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-40">
-                <DropdownMenuItem
-                //   onClick={() => callbacks?.onMoreAction?.("view-profile", row)}
-                >
-                  View Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                //   onClick={() => callbacks?.onMoreAction?.("download-cv", row)}
-                >
-                  Download CV
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="text-red-500 focus:text-red-500"
-                  //   onClick={() => callbacks?.onMoreAction?.("reject", row)}
-                >
-                  Reject
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         ),
       },
