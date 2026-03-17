@@ -143,41 +143,6 @@ export const EmployerJobApplicationColumn =
                 View
               </Button>
             </Link>
-            <Button
-              size="sm"
-              className="h-8 px-4 text-xs font-medium bg-green-500 hover:bg-green-600 text-white rounded-md"
-            >
-              Shortlist
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md"
-                >
-                  <MoreHorizontal className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-40">
-                <DropdownMenuItem
-                //   onClick={() => callbacks?.onMoreAction?.("view-profile", row)}
-                >
-                  View Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                //   onClick={() => callbacks?.onMoreAction?.("download-cv", row)}
-                >
-                  Download CV
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="text-red-500 focus:text-red-500"
-                  //   onClick={() => callbacks?.onMoreAction?.("reject", row)}
-                >
-                  Reject
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         ),
       },
