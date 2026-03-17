@@ -116,101 +116,103 @@ export function ActivityLogCard({ log }: ActivityLogCardProps) {
   const config = ACTION_CONFIG[log.action] ?? ACTION_CONFIG.DEFAULT;
   const Icon = config.icon;
   const timeAgo = formatDistanceToNow(new Date(log.created_at));
+
   const navigateTo = log.job_listing_id
     ? `job-listing/${log.job_listing_id}`
-    : `applications/${log.job_application_id}`;
+    : log.job_application_id
+      ? `applications/${log.job_application_id}`
+      : null;
 
-  return (
-    <Link href={navigateTo}>
-      <Card className="group px-4 py-3.5 flex items-start gap-4 border border-border/60 bg-card hover:border-violet-500/40 hover:bg-violet-500/3 transition-all duration-200 shadow-none rounded-xl">
-        {/* Icon */}
-        <div className={`mt-0.5 shrink-0 ${config.color}`}>
-          <Icon className="w-4 h-4" />
+  const cardContent = (
+    <Card className="group px-4 py-3.5 flex items-start gap-4 border border-border/60 bg-card hover:border-violet-500/40 hover:bg-violet-500/3 transition-all duration-200 shadow-none rounded-xl">
+      {/* Icon */}
+      <div className={`mt-0.5 shrink-0 ${config.color}`}>
+        <Icon className="w-4 h-4" />
+      </div>
+
+      <div className="flex-1 min-w-0 space-y-1.5">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-sm font-medium text-foreground leading-snug truncate">
+            {log.description}
+          </p>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <Badge
+              variant="secondary"
+              className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-violet-500/10 text-violet-400 border-0 hover:bg-violet-500/10"
+            >
+              {config.label}
+            </Badge>
+            <span className="text-[11px] text-muted-foreground whitespace-nowrap">
+              {timeAgo}
+            </span>
+          </div>
         </div>
 
-        {/* Body */}
-        <div className="flex-1 min-w-0 space-y-1.5">
-          {/* Top row */}
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-sm font-medium text-foreground leading-snug truncate">
-              {log.description}
-            </p>
-
-            <div className="flex items-center gap-2 shrink-0">
-              <Badge
-                variant="secondary"
-                className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-violet-500/10 text-violet-400 border-0 hover:bg-violet-500/10"
-              >
-                {config.label}
-              </Badge>
-              <span className="text-[11px] text-muted-foreground whitespace-nowrap">
-                {timeAgo}
+        {log.job_listing && (
+          <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Briefcase className="w-3 h-3 text-violet-400/70" />
+              <span className="font-medium text-foreground/80">
+                {log.job_listing.title}
               </span>
             </div>
-          </div>
 
-          {/* Job Listing detail */}
-          {log.job_listing && (
-            <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Briefcase className="w-3 h-3 text-violet-400/70" />
-                <span className="font-medium text-foreground/80">
-                  {log.job_listing.title}
-                </span>
+            {log.job_listing.location && (
+              <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                <MapPin className="w-2.5 h-2.5" />
+                {log.job_listing.location}
               </div>
+            )}
 
-              {log.job_listing.location && (
-                <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
-                  <MapPin className="w-2.5 h-2.5" />
-                  {log.job_listing.location}
-                </div>
-              )}
-
-              {log.job_listing.work_setup && (
-                <Badge
-                  variant="outline"
-                  className="text-[11px] font-normal px-1.5 py-0 rounded-full border-border/60"
-                >
-                  {
-                    formattedLabel[
-                      log.job_listing.work_setup as keyof typeof formattedLabel
-                    ]
-                  }
-                </Badge>
-              )}
-
-              {log.job_listing.job_type && (
-                <Badge
-                  variant="outline"
-                  className="text-[11px] font-normal px-1.5 py-0 rounded-full border-border/60"
-                >
-                  {
-                    formattedLabel[
-                      log.job_listing.job_type as keyof typeof formattedLabel
-                    ]
-                  }
-                </Badge>
-              )}
-            </div>
-          )}
-
-          {/* Application detail */}
-          {log.job_application && (
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] text-muted-foreground">
-                {log.job_application?.job_listing?.title}
-              </span>
-              <span className="text-muted-foreground/40 text-[11px]">·</span>
+            {log.job_listing.work_setup && (
               <Badge
                 variant="outline"
-                className="text-[11px] font-normal px-1.5 py-0 rounded-full border-border/60 capitalize"
+                className="text-[11px] font-normal px-1.5 py-0 rounded-full border-border/60"
               >
-                {log.job_application.status}
+                {
+                  formattedLabel[
+                    log.job_listing.work_setup as keyof typeof formattedLabel
+                  ]
+                }
               </Badge>
-            </div>
-          )}
-        </div>
-      </Card>
-    </Link>
+            )}
+
+            {log.job_listing.job_type && (
+              <Badge
+                variant="outline"
+                className="text-[11px] font-normal px-1.5 py-0 rounded-full border-border/60"
+              >
+                {
+                  formattedLabel[
+                    log.job_listing.job_type as keyof typeof formattedLabel
+                  ]
+                }
+              </Badge>
+            )}
+          </div>
+        )}
+
+        {/* Application detail */}
+        {log.job_application && (
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] text-muted-foreground">
+              {log.job_application?.job_listing?.title}
+            </span>
+            <span className="text-muted-foreground/40 text-[11px]">·</span>
+            <Badge
+              variant="outline"
+              className="text-[11px] font-normal px-1.5 py-0 rounded-full border-border/60 capitalize"
+            >
+              {log.job_application.status}
+            </Badge>
+          </div>
+        )}
+      </div>
+    </Card>
   );
+
+  if (!navigateTo) return cardContent;
+
+  return <Link href={navigateTo}>{cardContent}</Link>;
 }
