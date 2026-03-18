@@ -169,13 +169,13 @@ const JobSeekerProfilePage = () => {
                     Edit Profile
                   </Button>
                 )}
-                <Button
+                {/* <Button
                   size="sm"
                   variant="outline"
                   className="border-slate-200 text-slate-600 hover:bg-slate-50 text-xs h-8"
                 >
                   View Public Profile
-                </Button>
+                </Button> */}
               </div>
             </div>
           </div>

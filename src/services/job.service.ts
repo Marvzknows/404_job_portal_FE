@@ -47,6 +47,11 @@ export const jobService = {
     return res.data;
   },
 
+  viewPublicJobDetails: async (jobId: string) => {
+    const res = await api.get(`/jobs/${jobId}`);
+    return res.data;
+  },
+
   updateEmployerJobListingStatusApi: async (
     jobId: string,
     status: EmployerJobStatus,

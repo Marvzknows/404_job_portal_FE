@@ -35,6 +35,13 @@ export const useViewJobDetails = (jobId: string) => {
   });
 };
 
+export const useViewPublicJobDetails = (jobId: string) => {
+  return useQuery<JobDetailResponseT>({
+    queryKey: ["viewPublicJobDetails", jobId],
+    queryFn: () => jobService.viewPublicJobDetails(jobId),
+  });
+};
+
 export const useUpdateEmployerJobListingStatus = () => {
   return useMutation<
     void,
