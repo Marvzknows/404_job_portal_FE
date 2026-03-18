@@ -4,7 +4,8 @@ import Image from "next/image";
 import { Clock, MapPin, PhilippinePeso, Bookmark } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { formatToPesos } from "@/helpers/helpers";
+import { formatDistanceToNow, formatToPesos } from "@/helpers/helpers";
+import { formattedLabel, WORK_SETUP_STYLES } from "@/types/JobListing";
 
 type JobSeekerJobCardProps = {
   title: string;
@@ -15,6 +16,7 @@ type JobSeekerJobCardProps = {
   location?: string;
   jobType: string;
   datePosted: string;
+  workSetup: string;
   href: string;
   handleApply: (jobTitle: string, companyName: string) => void;
 };
@@ -25,16 +27,16 @@ const JobSeekerJobCard = ({
   companyLogo,
   maxSalary,
   minSalary,
-  location = "Remote",
+  location = "N/A",
   jobType,
   datePosted,
+  workSetup,
   href,
   handleApply,
 }: JobSeekerJobCardProps) => {
   return (
     <>
       <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm hover:border-violet-200 hover:shadow-md transition-all duration-200">
-        {/* Top Section */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex gap-3">
             <div className="relative w-12 h-12 rounded-lg overflow-hidden border bg-gray-50">
@@ -76,18 +78,30 @@ const JobSeekerJobCard = ({
 
           <span className="flex items-center gap-1">
             <Clock className="w-3.5 h-3.5 text-violet-400" />
-            Posted {datePosted}
+            Posted {formatDistanceToNow(new Date(datePosted))}
           </span>
         </div>
 
         {/* Footer */}
         <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-50">
-          <Badge
-            variant="outline"
-            className="text-xs font-medium bg-violet-50 text-violet-700 border-violet-200"
-          >
-            {jobType}
-          </Badge>
+          <div className="flex gap-2">
+            <Badge
+              variant="outline"
+              className="text-xs font-medium bg-violet-50 text-violet-700 border-violet-200"
+            >
+              {formattedLabel[jobType as keyof typeof formattedLabel]}
+            </Badge>
+
+            <Badge
+              variant="outline"
+              className={`text-xs font-medium ${
+                WORK_SETUP_STYLES[workSetup] ||
+                "bg-gray-50 text-gray-700 border-gray-200"
+              }`}
+            >
+              {formattedLabel[workSetup as keyof typeof formattedLabel]}
+            </Badge>
+          </div>
 
           <div className="flex gap-2">
             <Link href={href}>

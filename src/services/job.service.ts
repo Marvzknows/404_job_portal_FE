@@ -20,6 +20,15 @@ export type EmployerJobListParamsT = {
   status?: string;
 };
 
+export type JobListParamsT = {
+  page?: number;
+  per_page?: number;
+  search?: string;
+  status?: string;
+  job_type?: string;
+  work_setup?: string;
+};
+
 export type EmployerJobStatus = "open" | "closed";
 
 export const jobService = {
@@ -51,6 +60,11 @@ export const jobService = {
     payload: CreateJobFormT,
   ) => {
     const res = await api.put(`/employer/jobs/${jobId}`, payload);
+    return res.data;
+  },
+
+  getJobListApi: async (params?: JobListParamsT) => {
+    const res = await api.get("/jobs/list", { params });
     return res.data;
   },
 };
