@@ -10,9 +10,15 @@ import { useGetJobList } from "@/hooks/useJob";
 import JobSeekerJobCardSkeleton from "@/components/JobSeekerJobCardSkeleton";
 import PaginationComponent from "@/components/PaginationComponent";
 import { JobListParamsT } from "@/services/job.service";
+import { useAuth } from "@/context/AuthProvider";
+import AppAlertDialog from "@/components/AppAlertDialog";
+import { useRouter } from "next/navigation";
 
 const JobSeekerJobListingPage = () => {
+  const { profile } = useAuth();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [openNoProfile, setOpenNoProfile] = useState(false);
   const [search, setSearch] = useState("");
   const [params, setParams] = useState<JobListParamsT>({
     page: 1,
@@ -22,7 +28,6 @@ const JobSeekerJobListingPage = () => {
     job_type: "",
     work_setup: "",
   });
-
   const [createApplicationForm, setCreateApplicationForm] = useState({
     jobTitle: "",
     companyName: "",
@@ -36,6 +41,10 @@ const JobSeekerJobListingPage = () => {
   });
 
   const handleApply = (jobTitle: string, companyName: string) => {
+    if (!profile) {
+      setOpenNoProfile(true);
+      return;
+    }
     setOpen(true);
     setCreateApplicationForm({
       jobTitle,
@@ -109,6 +118,18 @@ const JobSeekerJobListingPage = () => {
         onClose={() => setOpen(false)}
         jobTitle={createApplicationForm.jobTitle}
         companyName={createApplicationForm.companyName}
+      />
+
+      <AppAlertDialog
+        open={openNoProfile}
+        onOpenChange={setOpenNoProfile}
+        title={"Let’s Set Up Your Profile"}
+        description={
+          "It looks like you don’t have a profile yet. Create one to get started and unlock all features."
+        }
+        confirmText={"Set Up Profile"}
+        onConfirm={() => router.push("/job-seeker/profile")}
+        onCancel={() => setOpen(false)}
       />
     </div>
   );

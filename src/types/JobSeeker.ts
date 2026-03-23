@@ -1,3 +1,4 @@
+import { UserT } from "./auth";
 import { FilesT } from "./files";
 
 export type JobSeekerProfileT = {
@@ -12,4 +13,10 @@ export type JobSeekerProfileT = {
   created_at: string;
   updated_at: string;
   resume: FilesT | null;
+  user: UserT;
+};
+
+export type JobSeekerProfileDataT = {
+  data: JobSeekerProfileT;
+  success: boolean;
 };

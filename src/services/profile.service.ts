@@ -32,4 +32,9 @@ export const profileService = {
     });
     return response.data;
   },
+
+  getJobSeekerProfileApi: async (id: string) => {
+    const response = await api.get(`/job_seeker/${id}`);
+    return response.data;
+  },
 };

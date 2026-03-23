@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,8 @@ import {
   User,
   MapPin,
 } from "lucide-react";
+import { useJobSeekerProfile } from "@/hooks/useProfile";
+import { useAuth } from "@/context/AuthProvider";
 
 interface JobSeekerProfile {
   first_name: string;
@@ -53,6 +55,10 @@ const formatFileSize = (bytes: number): string => {
 };
 
 const JobSeekerProfilePage = () => {
+  const { profile: jobSeekerProfile } = useAuth();
+  const { data } = useJobSeekerProfile(String(jobSeekerProfile?.id), {
+    enabled: jobSeekerProfile?.id != null,
+  });
   const [profile, setProfile] = useState<JobSeekerProfile>(defaultProfile);
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState<JobSeekerProfile>(defaultProfile);
@@ -61,6 +67,20 @@ const JobSeekerProfilePage = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!data?.data && !jobSeekerProfile?.id) return;
+    setProfile({
+      first_name: data?.data?.user?.first_name ?? "",
+      last_name: data?.data?.user?.last_name ?? "",
+      email: data?.data?.user?.email ?? "",
+      bio: data?.data?.bio ?? "",
+      portfolio: data?.data?.portfolio ?? "",
+      current_job_title: data?.data?.current_job_title ?? "",
+      phone: data?.data?.phone ?? "",
+      location: data?.data?.location ?? "",
+    });
+  }, [data, jobSeekerProfile?.id]);
 
   // Profile edit handlers
   const handleEdit = () => {

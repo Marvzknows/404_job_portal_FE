@@ -1,6 +1,7 @@
 import { ApiErrorResponse } from "@/lib/axios";
 import { profileService } from "@/services/profile.service";
 import { EmployerProfileT } from "@/types/Employer";
+import { JobSeekerProfileDataT } from "@/types/JobSeeker";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 
@@ -35,5 +36,16 @@ export const useCreateEmployerProfile = () => {
 export const useUpdateEmployerProfile = (id: number) => {
   return useMutation<void, AxiosError<ApiErrorResponse>, FormData>({
     mutationFn: (data) => profileService.UpdateEmployerProfileApi(id, data),
+  });
+};
+
+export const useJobSeekerProfile = (
+  id: string | undefined,
+  options?: { enabled?: boolean },
+) => {
+  return useQuery<JobSeekerProfileDataT>({
+    queryKey: ["jobSeekerProfile", id],
+    queryFn: () => profileService.getJobSeekerProfileApi(id ?? ""),
+    enabled: options?.enabled ?? true,
   });
 };
