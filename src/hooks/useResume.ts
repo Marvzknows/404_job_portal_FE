@@ -22,3 +22,9 @@ export const useDeleteResume = () => {
     mutationFn: ({ resumeId }) => resumeService.deleterResumeApi(resumeId),
   });
 };
+
+export const useUploadResume = () => {
+  return useMutation<void, AxiosError<ApiErrorResponse>, FormData>({
+    mutationFn: (formData) => resumeService.uploadResumeApi(formData),
+  });
+};

@@ -18,7 +18,11 @@ import {
 } from "lucide-react";
 import { useJobSeekerProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/context/AuthProvider";
-import { useDeleteResume, useGetUserResumeList } from "@/hooks/useResume";
+import {
+  useDeleteResume,
+  useGetUserResumeList,
+  useUploadResume,
+} from "@/hooks/useResume";
 import ResumeCard from "@/components/ResumeCard";
 import AppAlertDialog from "@/components/AppAlertDialog";
 import { toast } from "sonner";
@@ -68,6 +72,8 @@ const JobSeekerProfilePage = () => {
 
   const { mutate: deleteResume, isPending: isDeletingResume } =
     useDeleteResume();
+
+  const { mutate: uploadAction, isPending: isUploading } = useUploadResume();
   // #endregion
 
   const [profile, setProfile] = useState<JobSeekerProfile>(defaultProfile);
@@ -76,9 +82,7 @@ const JobSeekerProfilePage = () => {
   const [openAppDialog, setOpenAppDialog] = useState(false);
   const [deleteResumeId, setDeleteResumeId] = useState<string | null>(null);
 
-  const [resume, setResume] = useState<ResumeFile | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -126,19 +130,17 @@ const JobSeekerProfilePage = () => {
       alert("File size must be under 5MB.");
       return;
     }
-    setIsUploading(true);
-    setTimeout(() => {
-      setResume({
-        name: file.name,
-        size: file.size,
-        uploadedAt: new Date().toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        }),
-      });
-      setIsUploading(false);
-    }, 1200);
+
+    const formData = new FormData();
+    formData.append("resume", file);
+    uploadAction(formData, {
+      onSuccess: () => {
+        refetchResumeList();
+        toast.success("Resume uploaded successfully");
+      },
+      onError: (err) =>
+        toast.error(getErrorMessage(err, "Uploading resume failed")),
+    });
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -163,7 +165,8 @@ const JobSeekerProfilePage = () => {
           refetchResumeList();
           toast.success("File deleted successfully");
         },
-        onError: (err) => toast.error(getErrorMessage(err)),
+        onError: (err) =>
+          toast.error(getErrorMessage(err, "Deleting resume failed")),
       },
     );
   };
@@ -279,9 +282,7 @@ const JobSeekerProfilePage = () => {
               <>
                 <FileText className="w-10 h-10 text-slate-300" />
                 <p className="text-sm text-slate-500">
-                  {resume
-                    ? "Replace your resume"
-                    : "Upload your resume to apply faster"}
+                  Upload your resume to apply faster
                 </p>
                 <div className="flex gap-2">
                   <Button
@@ -292,16 +293,6 @@ const JobSeekerProfilePage = () => {
                     <Upload className="w-3.5 h-3.5" />
                     Upload Resume
                   </Button>
-                  {resume && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="border-slate-200 text-slate-600 hover:bg-slate-50 gap-1.5 text-xs h-8"
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                      Download Current
-                    </Button>
-                  )}
                 </div>
               </>
             )}
