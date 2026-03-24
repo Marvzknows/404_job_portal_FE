@@ -1,21 +1,12 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import PageHeader from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import {
-  Pencil,
-  Check,
-  Upload,
-  Download,
-  FileText,
-  User,
-  MapPin,
-} from "lucide-react";
+import { Pencil, Check, Upload, FileText, User, MapPin } from "lucide-react";
 import { useJobSeekerProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/context/AuthProvider";
 import {
@@ -27,6 +18,7 @@ import ResumeCard from "@/components/ResumeCard";
 import AppAlertDialog from "@/components/AppAlertDialog";
 import { toast } from "sonner";
 import { getErrorMessage } from "@/helpers/helpers";
+import { FilesT } from "@/types/files";
 
 interface JobSeekerProfile {
   first_name: string;
@@ -37,12 +29,6 @@ interface JobSeekerProfile {
   current_job_title: string;
   phone: string;
   location: string;
-}
-
-interface ResumeFile {
-  name: string;
-  size: number;
-  uploadedAt: string;
 }
 
 const defaultProfile: JobSeekerProfile = {
@@ -76,7 +62,6 @@ const JobSeekerProfilePage = () => {
   const { mutate: uploadAction, isPending: isUploading } = useUploadResume();
   // #endregion
 
-  const [profile, setProfile] = useState<JobSeekerProfile>(defaultProfile);
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState<JobSeekerProfile>(defaultProfile);
   const [openAppDialog, setOpenAppDialog] = useState(false);
@@ -85,19 +70,17 @@ const JobSeekerProfilePage = () => {
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (!data?.data && !jobSeekerProfile?.id) return;
-    setProfile({
-      first_name: data?.data?.user?.first_name ?? "",
-      last_name: data?.data?.user?.last_name ?? "",
-      email: data?.data?.user?.email ?? "",
-      bio: data?.data?.bio ?? "",
-      portfolio: data?.data?.portfolio ?? "",
-      current_job_title: data?.data?.current_job_title ?? "",
-      phone: data?.data?.phone ?? "",
-      location: data?.data?.location ?? "",
-    });
-  }, [data, jobSeekerProfile?.id]);
+  const profile: JobSeekerProfile = {
+    first_name: data?.data?.user?.first_name ?? defaultProfile.first_name,
+    last_name: data?.data?.user?.last_name ?? defaultProfile.last_name,
+    email: data?.data?.user?.email ?? defaultProfile.email,
+    bio: data?.data?.bio ?? defaultProfile.bio,
+    portfolio: data?.data?.portfolio ?? defaultProfile.portfolio,
+    current_job_title:
+      data?.data?.current_job_title ?? defaultProfile.current_job_title,
+    phone: data?.data?.phone ?? defaultProfile.phone,
+    location: data?.data?.location ?? defaultProfile.location,
+  };
 
   // Profile edit handlers
   const handleEdit = () => {
@@ -109,7 +92,7 @@ const JobSeekerProfilePage = () => {
     setIsEditing(false);
   };
   const handleSave = () => {
-    setProfile(form);
+    // setProfile(form);
     setIsEditing(false);
   };
   const field = (key: keyof JobSeekerProfile, value: string) =>
@@ -237,7 +220,7 @@ const JobSeekerProfilePage = () => {
               </p>
             )}
 
-            {userResumes?.data?.map((resume: any) => (
+            {userResumes?.data?.map((resume: FilesT) => (
               <ResumeCard
                 key={resume.id}
                 resume={resume}
@@ -248,7 +231,7 @@ const JobSeekerProfilePage = () => {
                   setDeleteResumeId(id);
                 }}
                 onDownload={() => {
-                  window.open(resume.file_url, "_blank");
+                  window.open(resume.url, "_blank");
                 }}
               />
             ))}
