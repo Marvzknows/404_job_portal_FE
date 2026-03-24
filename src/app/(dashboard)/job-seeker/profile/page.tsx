@@ -13,12 +13,16 @@ import {
   Upload,
   Download,
   FileText,
-  Trash2,
   User,
   MapPin,
 } from "lucide-react";
 import { useJobSeekerProfile } from "@/hooks/useProfile";
 import { useAuth } from "@/context/AuthProvider";
+import { useDeleteResume, useGetUserResumeList } from "@/hooks/useResume";
+import ResumeCard from "@/components/ResumeCard";
+import AppAlertDialog from "@/components/AppAlertDialog";
+import { toast } from "sonner";
+import { getErrorMessage } from "@/helpers/helpers";
 
 interface JobSeekerProfile {
   first_name: string;
@@ -48,20 +52,29 @@ const defaultProfile: JobSeekerProfile = {
   location: "San Francisco, CA",
 };
 
-const formatFileSize = (bytes: number): string => {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-};
-
 const JobSeekerProfilePage = () => {
   const { profile: jobSeekerProfile } = useAuth();
+
+  // #region API's
   const { data } = useJobSeekerProfile(String(jobSeekerProfile?.id), {
     enabled: jobSeekerProfile?.id != null,
   });
+
+  const {
+    data: userResumes,
+    isLoading: isLoadingResumes,
+    refetch: refetchResumeList,
+  } = useGetUserResumeList();
+
+  const { mutate: deleteResume, isPending: isDeletingResume } =
+    useDeleteResume();
+  // #endregion
+
   const [profile, setProfile] = useState<JobSeekerProfile>(defaultProfile);
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState<JobSeekerProfile>(defaultProfile);
+  const [openAppDialog, setOpenAppDialog] = useState(false);
+  const [deleteResumeId, setDeleteResumeId] = useState<string | null>(null);
 
   const [resume, setResume] = useState<ResumeFile | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -141,6 +154,20 @@ const JobSeekerProfilePage = () => {
     e.target.value = "";
   };
 
+  const handleDeleteResume = () => {
+    if (!deleteResumeId) return;
+    deleteResume(
+      { resumeId: deleteResumeId },
+      {
+        onSuccess: () => {
+          refetchResumeList();
+          toast.success("File deleted successfully");
+        },
+        onError: (err) => toast.error(getErrorMessage(err)),
+      },
+    );
+  };
+
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
@@ -149,7 +176,6 @@ const JobSeekerProfilePage = () => {
       />
 
       <div className="flex flex-col gap-4 w-full">
-        {/* ── Profile Header Card ── */}
         <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
           <div className="flex items-start gap-4">
             <div className="shrink-0 w-16 h-16 rounded-full bg-violet-100 flex items-center justify-center">
@@ -189,13 +215,6 @@ const JobSeekerProfilePage = () => {
                     Edit Profile
                   </Button>
                 )}
-                {/* <Button
-                  size="sm"
-                  variant="outline"
-                  className="border-slate-200 text-slate-600 hover:bg-slate-50 text-xs h-8"
-                >
-                  View Public Profile
-                </Button> */}
               </div>
             </div>
           </div>
@@ -204,32 +223,33 @@ const JobSeekerProfilePage = () => {
         <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
           <h3 className="text-sm font-semibold text-slate-800 mb-4">Resume</h3>
 
-          {resume && (
-            <div className="flex items-center gap-3 p-3 rounded-lg border border-violet-200 bg-violet-50 mb-3">
-              <div className="w-9 h-9 rounded-md bg-violet-600 flex items-center justify-center shrink-0">
-                <FileText className="w-4 h-4 text-white" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-slate-800 truncate">
-                  {resume.name}
-                </p>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  {formatFileSize(resume.size)} · Uploaded {resume.uploadedAt}
-                </p>
-              </div>
-              <Badge className="text-xs bg-violet-100 text-violet-700 border-0 hover:bg-violet-100 shrink-0">
-                Active
-              </Badge>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-slate-400 hover:text-red-500 hover:bg-red-50 shrink-0"
-                onClick={() => setResume(null)}
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            </div>
-          )}
+          <div className="flex flex-col gap-3 mb-3">
+            {isLoadingResumes && (
+              <p className="text-sm text-slate-400">Loading resumes...</p>
+            )}
+
+            {!isLoadingResumes && userResumes?.data?.length === 0 && (
+              <p className="text-sm text-slate-400 text-center py-2">
+                No resumes uploaded yet.
+              </p>
+            )}
+
+            {userResumes?.data?.map((resume: any) => (
+              <ResumeCard
+                key={resume.id}
+                resume={resume}
+                isDeleting={isDeletingResume}
+                onDelete={(id) => {
+                  if (!id) return;
+                  setOpenAppDialog(true);
+                  setDeleteResumeId(id);
+                }}
+                onDownload={() => {
+                  window.open(resume.file_url, "_blank");
+                }}
+              />
+            ))}
+          </div>
 
           <div
             onDragOver={(e) => {
@@ -414,6 +434,19 @@ const JobSeekerProfilePage = () => {
           )}
         </div>
       </div>
+
+      <AppAlertDialog
+        open={openAppDialog}
+        onOpenChange={setOpenAppDialog}
+        title={"Delete Resume"}
+        description={
+          "Are you sure you want to delete this resume? This action cannot be undone and the file will be permanently removed from your account."
+        }
+        confirmText={"Delete"}
+        confirmVariant="destructive"
+        onConfirm={handleDeleteResume}
+        onCancel={() => setOpenAppDialog(false)}
+      />
     </div>
   );
 };
