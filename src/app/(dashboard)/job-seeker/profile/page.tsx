@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import {
   useJobSeekerProfile,
+  useUpdateJobSeekerProfile,
   useUpdateProfileAvatar,
 } from "@/hooks/useProfile";
 import { useAuth } from "@/context/AuthProvider";
@@ -30,6 +31,7 @@ import AppAlertDialog from "@/components/AppAlertDialog";
 import { toast } from "sonner";
 import { getErrorMessage } from "@/helpers/helpers";
 import { FilesT } from "@/types/files";
+import Image from "next/image";
 
 interface JobSeekerProfile {
   first_name: string;
@@ -57,9 +59,12 @@ const JobSeekerProfilePage = () => {
   const { profile: jobSeekerProfile } = useAuth();
 
   // #region API's
-  const { data } = useJobSeekerProfile(String(jobSeekerProfile?.id), {
-    enabled: jobSeekerProfile?.id != null,
-  });
+  const { data, refetch: refetchProfile } = useJobSeekerProfile(
+    String(jobSeekerProfile?.id),
+    {
+      enabled: jobSeekerProfile?.id != null,
+    },
+  );
 
   const {
     data: userResumes,
@@ -73,6 +78,8 @@ const JobSeekerProfilePage = () => {
   const { mutate: uploadAction, isPending: isUploading } = useUploadResume();
   const { mutate: updateAvatarAction, isPending: isUpdatingAvatar } =
     useUpdateProfileAvatar();
+  const { mutate: updateProfileInfoAction, isPending: isUpdatingProfileInfo } =
+    useUpdateJobSeekerProfile(String(data?.data.id));
   // #endregion
 
   const [isEditing, setIsEditing] = useState(false);
@@ -109,7 +116,25 @@ const JobSeekerProfilePage = () => {
     setIsEditing(false);
   };
   const handleSave = () => {
-    setIsEditing(false);
+    const { bio, portfolio, current_job_title, phone, location } = form;
+    updateProfileInfoAction(
+      {
+        bio,
+        portfolio,
+        current_job_title,
+        phone,
+        location,
+      },
+      {
+        onSuccess: async () => {
+          await refetchProfile();
+          setIsEditing(false);
+          toast.success("Updating information success");
+        },
+        onError: (err) =>
+          toast.error(getErrorMessage(err, "Updating profile failed")),
+      },
+    );
   };
   const field = (key: keyof JobSeekerProfile, value: string) =>
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -230,10 +255,13 @@ const JobSeekerProfilePage = () => {
                 title="Click to update profile picture"
               >
                 {avatarUrl ? (
-                  <img
+                  <Image
                     src={avatarUrl}
                     alt={`${profile.first_name} ${profile.last_name}`}
                     className="w-full h-full object-cover"
+                    width={100}
+                    height={100}
+                    unoptimized
                   />
                 ) : (
                   <div className="w-full h-full bg-violet-100 flex items-center justify-center">
@@ -400,38 +428,6 @@ const JobSeekerProfilePage = () => {
           </h3>
 
           <div className="flex flex-col gap-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label className="text-xs text-slate-500">First Name</Label>
-                <Input
-                  value={isEditing ? form.first_name : profile.first_name}
-                  onChange={(e) => field("first_name", e.target.value)}
-                  disabled={!isEditing}
-                  className="text-sm disabled:bg-slate-50 disabled:text-slate-600 disabled:cursor-default border-slate-200 focus-visible:ring-violet-400"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs text-slate-500">Last Name</Label>
-                <Input
-                  value={isEditing ? form.last_name : profile.last_name}
-                  onChange={(e) => field("last_name", e.target.value)}
-                  disabled={!isEditing}
-                  className="text-sm disabled:bg-slate-50 disabled:text-slate-600 disabled:cursor-default border-slate-200 focus-visible:ring-violet-400"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label className="text-xs text-slate-500">Email</Label>
-              <Input
-                type="email"
-                value={isEditing ? form.email : profile.email}
-                onChange={(e) => field("email", e.target.value)}
-                disabled={!isEditing}
-                className="text-sm disabled:bg-slate-50 disabled:text-slate-600 disabled:cursor-default border-slate-200 focus-visible:ring-violet-400"
-              />
-            </div>
-
             <div className="space-y-1.5">
               <Label className="text-xs text-slate-500">Phone</Label>
               <Input
@@ -495,15 +491,17 @@ const JobSeekerProfilePage = () => {
               <Button
                 size="sm"
                 onClick={handleSave}
+                disabled={isUpdatingProfileInfo}
                 className="bg-violet-600 hover:bg-violet-700 text-white gap-1.5 h-8"
               >
                 <Check className="w-3.5 h-3.5" />
-                Save Changes
+                {isUpdatingProfileInfo ? "Saving..." : "Save Changes"}
               </Button>
               <Button
                 size="sm"
                 variant="outline"
                 onClick={handleCancel}
+                disabled={isUpdatingProfileInfo}
                 className="border-slate-200 text-slate-600 hover:bg-slate-50 gap-1.5 h-8"
               >
                 Cancel

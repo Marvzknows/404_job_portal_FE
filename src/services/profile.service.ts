@@ -1,5 +1,13 @@
 import api from "@/lib/axios";
 
+export type UpdateProfilePayload = {
+  bio: string;
+  portfolio?: string;
+  current_job_title: string;
+  phone: string;
+  location: string;
+};
+
 export const profileService = {
   getEmployerProfile: async (id: number) => {
     const response = await api.get(`/employer/${id}`);
@@ -44,6 +52,14 @@ export const profileService = {
         "Content-Type": "multipart/form-data",
       },
     });
+    return response.data;
+  },
+
+  updateJobSeekerProfileApi: async (
+    data: UpdateProfilePayload,
+    jobSeekerId: string,
+  ) => {
+    const response = await api.put(`job_seeker/${jobSeekerId}`, data);
     return response.data;
   },
 };
