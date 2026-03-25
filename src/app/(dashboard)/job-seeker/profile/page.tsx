@@ -45,18 +45,18 @@ interface JobSeekerProfile {
 }
 
 const defaultProfile: JobSeekerProfile = {
-  first_name: "John",
-  last_name: "Doe",
-  email: "john.doe@email.com",
-  bio: "Experienced frontend developer with 5+ years of experience in React and modern web technologies.",
-  portfolio: "https://myportfolio.dev",
-  current_job_title: "Senior Frontend Developer",
-  phone: "+1 (555) 123-4567",
-  location: "San Francisco, CA",
+  first_name: "",
+  last_name: "",
+  email: "N/A",
+  bio: "N/A",
+  portfolio: "N/A",
+  current_job_title: "N/A",
+  phone: "N/A",
+  location: "N/A",
 };
 
 const JobSeekerProfilePage = () => {
-  const { profile: jobSeekerProfile } = useAuth();
+  const { user, profile: jobSeekerProfile } = useAuth();
 
   // #region API's
   const { data, refetch: refetchProfile } = useJobSeekerProfile(
@@ -94,7 +94,7 @@ const JobSeekerProfilePage = () => {
 
   const profile: JobSeekerProfile = {
     first_name: data?.data?.user?.first_name ?? defaultProfile.first_name,
-    last_name: data?.data?.user?.last_name ?? defaultProfile.last_name,
+    last_name: data?.data?.user?.last_name ?? defaultProfile?.last_name,
     email: data?.data?.user?.email ?? defaultProfile.email,
     bio: data?.data?.bio ?? defaultProfile.bio,
     portfolio: data?.data?.portfolio ?? defaultProfile.portfolio,
@@ -257,7 +257,7 @@ const JobSeekerProfilePage = () => {
                 {avatarUrl ? (
                   <Image
                     src={avatarUrl}
-                    alt={`${profile.first_name} ${profile.last_name}`}
+                    alt={`${user?.first_name} ${user?.last_name}`}
                     className="w-full h-full object-cover"
                     width={100}
                     height={100}
@@ -301,7 +301,7 @@ const JobSeekerProfilePage = () => {
 
             <div className="flex-1 min-w-0">
               <h2 className="text-lg font-semibold text-slate-900">
-                {profile.first_name} {profile.last_name}
+                {user?.first_name} {user?.last_name}
               </h2>
               <p className="text-sm text-slate-500 mt-0.5">
                 {profile.current_job_title}
