@@ -84,7 +84,7 @@ export type JobApplicationListT = {
     full_name: string;
     email: string;
     current_job_title: string;
-    avatar_url: string | null;
+    avatar_url: FilesT;
   };
 };
 
