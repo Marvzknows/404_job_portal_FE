@@ -37,4 +37,13 @@ export const profileService = {
     const response = await api.get(`/job_seeker/${id}`);
     return response.data;
   },
+
+  updateProfileAvatarApi: async (formData: FormData) => {
+    const response = await api.post(`/profile/avatar`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  },
 };

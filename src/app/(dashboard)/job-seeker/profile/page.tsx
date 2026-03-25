@@ -6,8 +6,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Pencil, Check, Upload, FileText, User, MapPin } from "lucide-react";
-import { useJobSeekerProfile } from "@/hooks/useProfile";
+import {
+  Pencil,
+  Check,
+  Upload,
+  FileText,
+  User,
+  MapPin,
+  Camera,
+} from "lucide-react";
+import {
+  useJobSeekerProfile,
+  useUpdateProfileAvatar,
+} from "@/hooks/useProfile";
 import { useAuth } from "@/context/AuthProvider";
 import {
   useDeleteResume,
@@ -60,15 +71,19 @@ const JobSeekerProfilePage = () => {
     useDeleteResume();
 
   const { mutate: uploadAction, isPending: isUploading } = useUploadResume();
+  const { mutate: updateAvatarAction, isPending: isUpdatingAvatar } =
+    useUpdateProfileAvatar();
   // #endregion
 
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState<JobSeekerProfile>(defaultProfile);
   const [openAppDialog, setOpenAppDialog] = useState(false);
   const [deleteResumeId, setDeleteResumeId] = useState<string | null>(null);
-
   const [isDragging, setIsDragging] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   const profile: JobSeekerProfile = {
     first_name: data?.data?.user?.first_name ?? defaultProfile.first_name,
@@ -82,6 +97,8 @@ const JobSeekerProfilePage = () => {
     location: data?.data?.location ?? defaultProfile.location,
   };
 
+  const avatarUrl = avatarPreview ?? data?.data?.user?.avatar?.url ?? null;
+
   // Profile edit handlers
   const handleEdit = () => {
     setForm(profile);
@@ -92,11 +109,50 @@ const JobSeekerProfilePage = () => {
     setIsEditing(false);
   };
   const handleSave = () => {
-    // setProfile(form);
     setIsEditing(false);
   };
   const field = (key: keyof JobSeekerProfile, value: string) =>
     setForm((prev) => ({ ...prev, [key]: value }));
+
+  const handleAvatarClick = () => {
+    avatarInputRef.current?.click();
+  };
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Only JPG, PNG, WEBP, or GIF images are accepted.");
+      e.target.value = "";
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image size must be under 5MB.");
+      e.target.value = "";
+      return;
+    }
+
+    // Show preview immediately before the upload finishes
+    const previewUrl = URL.createObjectURL(file);
+    setAvatarPreview(previewUrl);
+
+    const formData = new FormData();
+    formData.append("avatar", file);
+
+    updateAvatarAction(formData, {
+      onSuccess: () => {
+        toast.success("Profile picture updated successfully");
+      },
+      onError: (err) => {
+        toast.error(getErrorMessage(err, "Failed to update profile picture"));
+        setAvatarPreview(null);
+      },
+    });
+
+    e.target.value = "";
+  };
 
   // Resume handlers
   const handleFile = (file: File) => {
@@ -164,9 +220,57 @@ const JobSeekerProfilePage = () => {
       <div className="flex flex-col gap-4 w-full">
         <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
           <div className="flex items-start gap-4">
-            <div className="shrink-0 w-16 h-16 rounded-full bg-violet-100 flex items-center justify-center">
-              <User className="w-8 h-8 text-violet-500" />
+            <div className="relative shrink-0 group">
+              <button
+                type="button"
+                onClick={handleAvatarClick}
+                disabled={isUpdatingAvatar}
+                className="relative w-16 h-16 rounded-full overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed"
+                aria-label="Update profile picture"
+                title="Click to update profile picture"
+              >
+                {avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    alt={`${profile.first_name} ${profile.last_name}`}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-violet-100 flex items-center justify-center">
+                    <User className="w-8 h-8 text-violet-500" />
+                  </div>
+                )}
+
+                {/* Hover / uploading overlay */}
+                <div
+                  className={`
+                    absolute inset-0 flex flex-col items-center justify-center gap-0.5
+                    bg-black/40 transition-opacity duration-150
+                    ${isUpdatingAvatar ? "opacity-100" : "opacity-0 group-hover:opacity-100"}
+                  `}
+                >
+                  {isUpdatingAvatar ? (
+                    <div className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <Camera className="w-4 h-4 text-white" />
+                      <span className="text-white text-[10px] font-medium leading-tight">
+                        Update
+                      </span>
+                    </>
+                  )}
+                </div>
+              </button>
+
+              <input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                onChange={handleAvatarChange}
+                className="hidden"
+              />
             </div>
+
             <div className="flex-1 min-w-0">
               <h2 className="text-lg font-semibold text-slate-900">
                 {profile.first_name} {profile.last_name}

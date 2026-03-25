@@ -49,3 +49,9 @@ export const useJobSeekerProfile = (
     enabled: options?.enabled ?? true,
   });
 };
+
+export const useUpdateProfileAvatar = () => {
+  return useMutation<void, AxiosError<ApiErrorResponse>, FormData>({
+    mutationFn: (formData) => profileService.updateProfileAvatarApi(formData),
+  });
+};
