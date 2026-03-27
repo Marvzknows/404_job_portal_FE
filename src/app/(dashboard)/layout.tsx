@@ -14,7 +14,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const { setProfile, setUser } = useAuth();
-  const { data: userData, isFetching, error, refetch } = useMe();
+  const { data: userData, isLoading, error, refetch } = useMe();
   const router = useRouter();
 
   useEffect(() => {
@@ -30,7 +30,7 @@ export default function DashboardLayout({
     }
   }, [userData, setProfile, setUser]);
 
-  if (isFetching) {
+  if (isLoading) {
     return <FullPageLoader />;
   }
 

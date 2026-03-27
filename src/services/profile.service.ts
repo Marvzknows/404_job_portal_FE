@@ -62,4 +62,13 @@ export const profileService = {
     const response = await api.put(`job_seeker/${jobSeekerId}`, data);
     return response.data;
   },
+
+  createJobSeekerProfileApi: async (formData: FormData) => {
+    const response = await api.post("/job_seeker", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  },
 };

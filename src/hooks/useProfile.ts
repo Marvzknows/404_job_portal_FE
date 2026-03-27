@@ -5,7 +5,7 @@ import {
 } from "@/services/profile.service";
 import { EmployerProfileT } from "@/types/Employer";
 import { JobSeekerProfileDataT } from "@/types/JobSeeker";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 
 export type CreateEmployerProfileResponse = {
@@ -63,5 +63,17 @@ export const useUpdateJobSeekerProfile = (jobSeekerId: string) => {
   return useMutation<void, AxiosError<ApiErrorResponse>, UpdateProfilePayload>({
     mutationFn: (payload) =>
       profileService.updateJobSeekerProfileApi(payload, jobSeekerId),
+  });
+};
+
+export const useCreateJobSeekerProfile = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, AxiosError<ApiErrorResponse>, FormData>({
+    mutationFn: (payload) => profileService.createJobSeekerProfileApi(payload),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+    },
   });
 };
