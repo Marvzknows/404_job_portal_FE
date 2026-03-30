@@ -20,6 +20,7 @@ type JobSeekerJobCardProps = {
   workSetup: string;
   href: string;
   handleApply: (jobId: string, jobTitle: string, companyName: string) => void;
+  isApplied?: boolean;
 };
 
 const JobSeekerJobCard = ({
@@ -35,6 +36,7 @@ const JobSeekerJobCard = ({
   workSetup,
   href,
   handleApply,
+  isApplied = false,
 }: JobSeekerJobCardProps) => {
   return (
     <>
@@ -116,8 +118,9 @@ const JobSeekerJobCard = ({
               onClick={() => handleApply(id, title, companyName)}
               size="sm"
               className="bg-violet-600 hover:bg-violet-700"
+              disabled={isApplied}
             >
-              Apply
+              {isApplied ? "Applied" : "Apply"}
             </Button>
           </div>
         </div>

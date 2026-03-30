@@ -107,6 +107,7 @@ const JobSeekerJobListingPage = () => {
               href={`/job-seeker/job-listing/${job.id}`}
               companyName={job.employer.company_name}
               companyLogo={job.employer.logo?.url}
+              isApplied={job.is_applied}
               handleApply={handleApply}
             />
           ))}

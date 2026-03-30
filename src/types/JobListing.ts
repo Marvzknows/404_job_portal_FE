@@ -15,6 +15,7 @@ export type JobListingT = {
   employer: EmployerProfileDataT;
   location: string;
   total_applicants: number;
+  is_applied: boolean;
   created_at: string;
   updated_at: string;
 };
