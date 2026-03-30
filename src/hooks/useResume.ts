@@ -10,10 +10,11 @@ export type ResumeLists = {
   data: FilesT[];
 };
 
-export const useGetUserResumeList = () => {
+export const useGetUserResumeList = (enable?: boolean) => {
   return useQuery<ResumeLists>({
     queryKey: ["userResumeList"],
     queryFn: () => resumeService.userResumesListApi(),
+    enabled: enable,
   });
 };
 

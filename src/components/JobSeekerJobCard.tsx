@@ -8,6 +8,7 @@ import { formatDistanceToNow, formatToPesos } from "@/helpers/helpers";
 import { formattedLabel, WORK_SETUP_STYLES } from "@/types/JobListing";
 
 type JobSeekerJobCardProps = {
+  id: string;
   title: string;
   companyName: string;
   companyLogo?: string;
@@ -18,10 +19,11 @@ type JobSeekerJobCardProps = {
   datePosted: string;
   workSetup: string;
   href: string;
-  handleApply: (jobTitle: string, companyName: string) => void;
+  handleApply: (jobId: string, jobTitle: string, companyName: string) => void;
 };
 
 const JobSeekerJobCard = ({
+  id,
   title,
   companyName,
   companyLogo,
@@ -111,7 +113,7 @@ const JobSeekerJobCard = ({
             </Link>
 
             <Button
-              onClick={() => handleApply(title, companyName)}
+              onClick={() => handleApply(id, title, companyName)}
               size="sm"
               className="bg-violet-600 hover:bg-violet-700"
             >

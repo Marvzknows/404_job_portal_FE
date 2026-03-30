@@ -20,6 +20,7 @@ const JobSeekerJobListingPage = () => {
   const [open, setOpen] = useState(false);
   const [openNoProfile, setOpenNoProfile] = useState(false);
   const [search, setSearch] = useState("");
+  const [jobApplicationId, setJobApplicationId] = useState("");
   const [params, setParams] = useState<JobListParamsT>({
     page: 1,
     per_page: 6,
@@ -40,12 +41,17 @@ const JobSeekerJobListingPage = () => {
     search: debouncedSearch,
   });
 
-  const handleApply = (jobTitle: string, companyName: string) => {
+  const handleApply = (
+    jobId: string,
+    jobTitle: string,
+    companyName: string,
+  ) => {
     if (!profile) {
       setOpenNoProfile(true);
       return;
     }
     setOpen(true);
+    setJobApplicationId(jobId);
     setCreateApplicationForm({
       jobTitle,
       companyName,
@@ -90,6 +96,7 @@ const JobSeekerJobListingPage = () => {
           {data?.data.data.map((job) => (
             <JobSeekerJobCard
               key={job.id}
+              id={job.id}
               title={job.title}
               jobType={job.job_type}
               location={job.location}
@@ -118,6 +125,7 @@ const JobSeekerJobListingPage = () => {
         onClose={() => setOpen(false)}
         jobTitle={createApplicationForm.jobTitle}
         companyName={createApplicationForm.companyName}
+        jobId={jobApplicationId}
       />
 
       <AppAlertDialog
