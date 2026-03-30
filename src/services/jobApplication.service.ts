@@ -6,6 +6,8 @@ export type JobApplicationListParamsT = {
   per_page?: number;
   search?: string;
   status?: string;
+  work_setup?: string;
+  job_type?: string;
 };
 
 export type UpdateApplicationStatusPayloadT = {

@@ -78,6 +78,7 @@ export type JobApplicationListT = {
   job_listing: {
     id: string;
     title: string;
+    location: string;
   };
   job_seeker: {
     id: string;
