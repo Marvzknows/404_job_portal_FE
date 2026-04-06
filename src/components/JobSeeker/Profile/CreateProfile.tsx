@@ -105,7 +105,7 @@ const CreateProfile = () => {
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs text-slate-500">Job Title</Label>
+            <Label className="text-xs text-slate-500">Current Job Title</Label>
             <Input
               value={form.current_job_title}
               onChange={(e) => field("current_job_title", e.target.value)}

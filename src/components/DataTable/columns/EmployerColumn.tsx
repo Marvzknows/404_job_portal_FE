@@ -76,7 +76,7 @@ export const EmployerJobApplicationColumn =
         render: (row) => (
           <div className="flex items-center gap-3">
             <CandidateAvatar
-              src={row.job_seeker.avatar_url.url ?? ""}
+              src={row?.job_seeker?.avatar_url?.url ?? ""}
               name={row.job_seeker.full_name}
             />
             <div className="flex flex-col">
