@@ -3,6 +3,7 @@ import {
   CreateJobFormT,
   EmployerJobListParamsT,
   EmployerJobStatus,
+  JobListParamsT,
   jobService,
 } from "@/services/job.service";
 import { JobDetailResponseT, JobListingListT } from "@/types/JobListing";
@@ -34,6 +35,13 @@ export const useViewJobDetails = (jobId: string) => {
   });
 };
 
+export const useViewPublicJobDetails = (jobId: string) => {
+  return useQuery<JobDetailResponseT>({
+    queryKey: ["viewPublicJobDetails", jobId],
+    queryFn: () => jobService.viewPublicJobDetails(jobId),
+  });
+};
+
 export const useUpdateEmployerJobListingStatus = () => {
   return useMutation<
     void,
@@ -49,5 +57,13 @@ export const useUpdateJobDetails = () => {
   return useMutation<void, AxiosError<ApiErrorResponse>, UpdateJobVariables>({
     mutationFn: ({ jobId, payload }) =>
       jobService.updateJobListingDetailsApi(jobId, payload),
+  });
+};
+
+export const useGetJobList = (params?: JobListParamsT) => {
+  return useQuery<JobListingListT>({
+    queryKey: ["jobList", params],
+    queryFn: () => jobService.getJobListApi(params),
+    refetchInterval: 10000,
   });
 };

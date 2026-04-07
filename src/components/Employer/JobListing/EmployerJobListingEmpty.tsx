@@ -28,7 +28,7 @@ const EmployerJobListingEmpty = ({
 
       {!isFiltered && (
         <Button asChild>
-          <Link href="/employer/jobs/create">Post a Job</Link>
+          <Link href="/employer/create-job">Post a Job</Link>
         </Button>
       )}
     </div>

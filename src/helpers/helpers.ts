@@ -1,3 +1,6 @@
+import { ApiErrorResponse } from "@/lib/axios";
+import { AxiosError } from "axios";
+
 export const formatSalary = (min: string, max: string) => {
   const fmt = (v: string) =>
     Number(v).toLocaleString("en-PH", {
@@ -53,4 +56,19 @@ export const formatDistanceToNow = (date: Date): string => {
   if (months < 12) return `${months} month${months !== 1 ? "s" : ""} ago`;
   const years = Math.floor(months / 12);
   return `${years} year${years !== 1 ? "s" : ""} ago`;
+};
+
+export const getErrorMessage = (
+  error: AxiosError<ApiErrorResponse>,
+  fallbackMessage?: string,
+) => {
+  const data = error.response?.data;
+
+  const firstError = data?.errors
+    ? Object.values(data.errors).flat()[0]
+    : undefined;
+
+  return (
+    firstError || data?.message || fallbackMessage || "Something went wrong."
+  );
 };

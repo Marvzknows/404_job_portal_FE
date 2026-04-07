@@ -52,9 +52,10 @@ const CandidateAvatar = ({ src, name }: { src?: string; name: string }) => {
       <Image
         src={src}
         alt={name}
-        width={40}
-        height={40}
+        width={50}
+        height={50}
         className="rounded-full object-cover border border-gray-200"
+        unoptimized
       />
     );
   }
@@ -75,7 +76,7 @@ export const EmployerJobApplicationColumn =
         render: (row) => (
           <div className="flex items-center gap-3">
             <CandidateAvatar
-              src={row.job_seeker.avatar_url ?? ""}
+              src={row?.job_seeker?.avatar_url?.url ?? ""}
               name={row.job_seeker.full_name}
             />
             <div className="flex flex-col">

@@ -138,7 +138,7 @@ const ViewApplicationPage = ({ id }: { id: string }) => {
                   {data?.data?.job_seeker?.user?.full_name}
                 </h1>
                 <p className="text-sm text-muted-foreground">
-                  {data?.data.job_seeker.job_title}
+                  {data?.data?.job_seeker.job_title}
                 </p>
               </div>
             </div>
@@ -146,11 +146,11 @@ const ViewApplicationPage = ({ id }: { id: string }) => {
             <div className="flex shrink-0 items-center gap-2">
               <Badge
                 variant="outline"
-                className={`${JOB_APPLICATION_STATUS_STYLESR[data?.data.status as keyof typeof JOB_APPLICATION_STATUS_STYLESR]}`}
+                className={`${JOB_APPLICATION_STATUS_STYLESR[data?.data?.status as keyof typeof JOB_APPLICATION_STATUS_STYLESR]}`}
               >
                 {
                   formattedLabel[
-                    data?.data.status as keyof typeof formattedLabel
+                    data?.data?.status as keyof typeof formattedLabel
                   ]
                 }
               </Badge>
@@ -162,8 +162,8 @@ const ViewApplicationPage = ({ id }: { id: string }) => {
                 asChild
               >
                 <a
-                  href={data?.data.resume.url}
-                  download={data?.data.resume.file_name}
+                  href={data?.data?.resume?.url}
+                  download={data?.data?.resume?.file_name}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -210,7 +210,7 @@ const ViewApplicationPage = ({ id }: { id: string }) => {
 
           <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
             <Calendar className="h-3.5 w-3.5" />
-            Applied {formatDate(data?.data.applied_at ?? "")}
+            Applied {formatDate(data?.data?.applied_at ?? "")}
           </p>
 
           <Separator className="my-6" />
@@ -223,12 +223,12 @@ const ViewApplicationPage = ({ id }: { id: string }) => {
                 value: data?.data?.job_seeker?.user?.email,
                 href: `mailto:${data?.data?.job_seeker?.user?.email}`,
               },
-              { icon: Phone, value: data?.data.job_seeker.phone ?? "NA" },
-              { icon: MapPin, value: data?.data.job_seeker.phone ?? "N/A" },
+              { icon: Phone, value: data?.data?.job_seeker.phone ?? "NA" },
+              { icon: MapPin, value: data?.data?.job_seeker.phone ?? "N/A" },
               {
                 icon: Globe,
                 value: "Portfolio",
-                href: data?.data.job_seeker.portfolio ?? "N/A",
+                href: data?.data?.job_seeker.portfolio ?? "N/A",
               },
             ].map(({ icon: Icon, value, href }, i) => (
               <div key={i} className="flex items-start gap-2">
@@ -251,9 +251,9 @@ const ViewApplicationPage = ({ id }: { id: string }) => {
           </div>
 
           {/* Bio */}
-          {data?.data.job_seeker.bio && (
+          {data?.data?.job_seeker.bio && (
             <p className="mt-5 text-sm leading-relaxed text-muted-foreground">
-              {data?.data.job_seeker.bio}
+              {data?.data?.job_seeker.bio}
             </p>
           )}
 
@@ -265,7 +265,7 @@ const ViewApplicationPage = ({ id }: { id: string }) => {
               Cover Letter
             </h2>
             <p className="text-sm leading-relaxed text-foreground">
-              {data?.data.cover_letter || (
+              {data?.data?.cover_letter || (
                 <span className="italic text-muted-foreground">
                   No cover letter provided.
                 </span>
@@ -284,17 +284,17 @@ const ViewApplicationPage = ({ id }: { id: string }) => {
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="font-semibold text-foreground">
-                    {data?.data.job_listing.title}
+                    {data?.data?.job_listing.title}
                   </p>
                   <div className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <Building2 className="h-3.5 w-3.5" />
-                      {data?.data.job_listing.employer.company_name}
+                      {data?.data?.job_listing.employer.company_name}
                     </span>
                     <span>·</span>
                     <span className="flex items-center gap-1">
                       <MapPin className="h-3.5 w-3.5" />
-                      {data?.data.job_listing.employer.location}
+                      {data?.data?.job_listing.employer.location}
                     </span>
                   </div>
                 </div>
@@ -302,14 +302,14 @@ const ViewApplicationPage = ({ id }: { id: string }) => {
                   variant="outline"
                   className={`${
                     STATUS_STYLES[
-                      data?.data.job_listing
+                      data?.data?.job_listing
                         .status as keyof typeof STATUS_STYLES
                     ]
                   }`}
                 >
                   {
                     formattedLabel[
-                      data?.data.job_listing
+                      data?.data?.job_listing
                         .status as keyof typeof formattedLabel
                     ]
                   }
@@ -318,8 +318,8 @@ const ViewApplicationPage = ({ id }: { id: string }) => {
 
               <div className="mt-4 flex flex-wrap gap-2">
                 {[
-                  data?.data.job_listing.work_setup,
-                  data?.data.job_listing.job_type,
+                  data?.data?.job_listing.work_setup,
+                  data?.data?.job_listing.job_type,
                 ].map((tag) => (
                   <span
                     key={tag}
@@ -330,22 +330,22 @@ const ViewApplicationPage = ({ id }: { id: string }) => {
                 ))}
                 <span className="inline-flex items-center gap-1 rounded-md bg-violet-50 px-2.5 py-1 text-xs font-medium text-violet-700">
                   {formatSalary(
-                    String(data?.data.job_listing.salary_min),
-                    String(data?.data.job_listing.salary_max),
+                    String(data?.data?.job_listing.salary_min),
+                    String(data?.data?.job_listing.salary_max),
                   )}
                 </span>
               </div>
 
               <div className="mt-3 flex flex-wrap items-center gap-4 border-t border-gray-100 pt-3">
                 <a
-                  href={`mailto:${data?.data.job_listing.employer.contact_email}`}
+                  href={`mailto:${data?.data?.job_listing.employer.contact_email}`}
                   className="flex items-center gap-1 text-xs text-muted-foreground hover:text-violet-600"
                 >
                   <Mail className="h-3.5 w-3.5" />
-                  {data?.data.job_listing.employer.contact_email}
+                  {data?.data?.job_listing.employer.contact_email}
                 </a>
                 <a
-                  href={data?.data.job_listing.employer.website ?? "N/A"}
+                  href={data?.data?.job_listing.employer.website ?? "N/A"}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-1 text-xs text-muted-foreground hover:text-violet-600"

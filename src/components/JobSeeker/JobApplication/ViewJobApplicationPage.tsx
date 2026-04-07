@@ -22,56 +22,28 @@ import { formatDate, formatLabel, formatSalary } from "@/helpers/helpers";
 import StatusBadge from "./StatusBadge";
 import Section from "./Section";
 import InfoRow from "./InfoRow";
-
-const mockApplication = {
-  id: 3,
-  status: "rejected",
-  cover_letter: "awfasfa wfawawfa",
-  applied_at: "2026-02-21 11:40:34",
-  job_seeker: {
-    id: 1,
-    bio: "hehehehe bio",
-    portfolio: "https://my-portfolio-v2-blue.vercel.app/",
-    job_title: "Frontend Developer",
-    phone: "09182455347",
-    location: "Pulilan Bulacan",
-    user: {
-      id: 3,
-      first_name: "Clark",
-      last_name: "Kent",
-      email: "ck@gmail.com",
-      role: "job_seeker",
-      avatar_id: null,
-      full_name: "Clark Kent",
-    },
-  },
-  job_listing: {
-    id: 5,
-    title: "Full stack Developer",
-    status: "open",
-    salary_min: "322633.00",
-    salary_max: "700000.00",
-    work_setup: "hybrid",
-    job_type: "contract",
-    employer: {
-      id: 4,
-      company_name: "new company name",
-      company_description: "new company company_description",
-      website: "new website link",
-      contact_email: "test@gmail.com",
-      contact_phone: "09121211212",
-      location: "new location",
-    },
-  },
-};
+import { useGetJobApplication } from "@/hooks/useJobApplication";
+import ViewJobApplicationSkeleton from "./ViewJobApplicationSkeleton";
 
 type Props = { id: string };
 
 const ViewJobApplicationPage = ({ id }: Props) => {
-  console.log(id);
-  const data = mockApplication;
-  const { job_seeker, job_listing } = data;
-  const { employer } = job_listing;
+  const { data, isLoading } = useGetJobApplication(id);
+
+  const { job_seeker, job_listing } = data?.data || {};
+  const { employer } = job_listing || {};
+
+  if (isLoading) {
+    return <ViewJobApplicationSkeleton />;
+  }
+
+  if (!data || !data.data) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-gray-500">Application not found.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-5 w-full">
@@ -88,14 +60,14 @@ const ViewJobApplicationPage = ({ id }: Props) => {
             </Button>
           </Link>
           <h1 className="text-xl font-bold text-slate-900">
-            Application #{data.id}
+            {data?.data.job_listing.title}
           </h1>
           <p className="text-sm text-slate-400 mt-0.5 flex items-center gap-1.5">
             <CalendarDays className="w-3.5 h-3.5" />
-            Applied {formatDate(data.applied_at)}
+            Applied {formatDate(data?.data.applied_at ?? "")}
           </p>
         </div>
-        <StatusBadge status={data.status} />
+        <StatusBadge status={data?.data.status} />
       </div>
 
       <Section icon={<User className="w-4 h-4" />} title="Applicant">
@@ -105,9 +77,9 @@ const ViewJobApplicationPage = ({ id }: Props) => {
           </div>
           <div>
             <p className="text-base font-semibold text-slate-900">
-              {job_seeker.user.full_name}
+              {job_seeker?.user?.full_name}
             </p>
-            <p className="text-sm text-slate-500">{job_seeker.job_title}</p>
+            <p className="text-sm text-slate-500">{job_seeker?.job_title}</p>
           </div>
         </div>
 
@@ -117,34 +89,34 @@ const ViewJobApplicationPage = ({ id }: Props) => {
           <InfoRow
             icon={<Mail className="w-4 h-4" />}
             label="Email"
-            value={job_seeker.user.email}
-            href={`mailto:${job_seeker.user.email}`}
+            value={job_seeker?.user?.email ?? "N/A"}
+            href={`mailto:${job_seeker?.user?.email}`}
           />
           <InfoRow
             icon={<Phone className="w-4 h-4" />}
             label="Phone"
-            value={job_seeker.phone}
+            value={job_seeker?.phone ?? "N/A"}
           />
           <InfoRow
             icon={<MapPin className="w-4 h-4" />}
             label="Location"
-            value={job_seeker.location}
+            value={job_seeker?.location ?? "N/A"}
           />
           <InfoRow
             icon={<Globe className="w-4 h-4" />}
             label="Portfolio"
-            value={job_seeker.portfolio}
-            href={job_seeker.portfolio}
+            value={job_seeker?.portfolio ?? "N/A"}
+            href={job_seeker?.portfolio}
           />
         </div>
 
-        {job_seeker.bio && (
+        {job_seeker?.bio && (
           <>
             <Separator className="my-4" />
             <div>
               <p className="text-xs text-slate-400 mb-1.5">Bio</p>
               <p className="text-sm text-slate-700 leading-relaxed">
-                {job_seeker.bio}
+                {job_seeker?.bio}
               </p>
             </div>
           </>
@@ -152,9 +124,9 @@ const ViewJobApplicationPage = ({ id }: Props) => {
       </Section>
 
       <Section icon={<FileText className="w-4 h-4" />} title="Cover Letter">
-        {data.cover_letter ? (
+        {data?.data?.cover_letter ? (
           <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
-            {data.cover_letter}
+            {data?.data?.cover_letter}
           </p>
         ) : (
           <p className="text-sm text-slate-400 italic">
@@ -167,21 +139,21 @@ const ViewJobApplicationPage = ({ id }: Props) => {
         <div className="flex items-start justify-between gap-3 mb-4 flex-wrap">
           <div>
             <p className="text-base font-semibold text-slate-900">
-              {job_listing.title}
+              {job_listing?.title}
             </p>
             <p className="text-sm text-slate-500 mt-0.5">
-              {employer.company_name}
+              {employer?.company_name}
             </p>
           </div>
           <Badge
             variant="outline"
             className={`text-xs shrink-0 ${
-              job_listing.status === "open"
+              job_listing?.status === "open"
                 ? "border-emerald-200 bg-emerald-50 text-emerald-700"
                 : "border-slate-200 bg-slate-50 text-slate-500"
             }`}
           >
-            {formatLabel(job_listing.status)}
+            {formatLabel(job_listing?.status ?? "")}
           </Badge>
         </div>
 
@@ -191,17 +163,20 @@ const ViewJobApplicationPage = ({ id }: Props) => {
           <InfoRow
             icon={<DollarSign className="w-4 h-4" />}
             label="Salary Range"
-            value={formatSalary(job_listing.salary_min, job_listing.salary_max)}
+            value={formatSalary(
+              job_listing?.salary_min ?? "",
+              job_listing?.salary_max ?? "",
+            )}
           />
           <InfoRow
             icon={<Layers className="w-4 h-4" />}
             label="Work Setup"
-            value={formatLabel(job_listing.work_setup)}
+            value={formatLabel(job_listing?.work_setup ?? "")}
           />
           <InfoRow
             icon={<Briefcase className="w-4 h-4" />}
             label="Job Type"
-            value={formatLabel(job_listing.job_type)}
+            value={formatLabel(job_listing?.job_type ?? "")}
           />
         </div>
       </Section>
@@ -213,16 +188,16 @@ const ViewJobApplicationPage = ({ id }: Props) => {
           </div>
           <div>
             <p className="text-sm font-semibold text-slate-900">
-              {employer.company_name}
+              {employer?.company_name}
             </p>
-            <p className="text-xs text-slate-500">{employer.location}</p>
+            <p className="text-xs text-slate-500">{employer?.location}</p>
           </div>
         </div>
 
-        {employer.company_description && (
+        {employer?.company_description && (
           <>
             <p className="text-sm text-slate-600 leading-relaxed mb-4">
-              {employer.company_description}
+              {employer?.company_description}
             </p>
             <Separator className="mb-4" />
           </>
@@ -232,28 +207,28 @@ const ViewJobApplicationPage = ({ id }: Props) => {
           <InfoRow
             icon={<Mail className="w-4 h-4" />}
             label="Contact Email"
-            value={employer.contact_email}
-            href={`mailto:${employer.contact_email}`}
+            value={employer?.contact_email ?? "N/A"}
+            href={`mailto:${employer?.contact_email}`}
           />
           <InfoRow
             icon={<Phone className="w-4 h-4" />}
             label="Contact Phone"
-            value={employer.contact_phone}
+            value={employer?.contact_phone ?? "N/A"}
           />
           <InfoRow
             icon={<Globe className="w-4 h-4" />}
             label="Website"
-            value={employer.website}
+            value={employer?.website ?? "N/A"}
             href={
-              employer.website.startsWith("http")
-                ? employer.website
-                : `https://${employer.website}`
+              employer?.website?.startsWith("http")
+                ? employer?.website
+                : `https://${employer?.website}`
             }
           />
           <InfoRow
             icon={<MapPin className="w-4 h-4" />}
             label="Location"
-            value={employer.location}
+            value={employer?.location ?? "N/A"}
           />
         </div>
       </Section>

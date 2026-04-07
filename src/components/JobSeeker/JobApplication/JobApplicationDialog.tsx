@@ -22,51 +22,38 @@ import {
   CheckCircle2,
   Trash2,
 } from "lucide-react";
-import { formatSize } from "@/helpers/helpers";
+import { formatDate, formatSize, getErrorMessage } from "@/helpers/helpers";
+import { useGetUserResumeList } from "@/hooks/useResume";
+import { ResumeListSkeleton } from "./ResumeListSkeleton";
+import { useCreateJobApplication } from "@/hooks/useJobApplication";
+import { toast } from "sonner";
 
-interface SavedResume {
-  id: string;
-  name: string;
-  size: number;
-  uploadedAt: string;
-}
-
-interface JobApplicationDialogProps {
+type JobApplicationDialogProps = {
   open: boolean;
   onClose: () => void;
   jobTitle?: string;
   companyName?: string;
-}
-
-const mockSavedResumes: SavedResume[] = [
-  {
-    id: "r1",
-    name: "Clark_Kent_Resume_2026.pdf",
-    size: 284500,
-    uploadedAt: "Mar 1, 2026",
-  },
-  {
-    id: "r2",
-    name: "CK_Frontend_Resume.pdf",
-    size: 198000,
-    uploadedAt: "Jan 14, 2026",
-  },
-];
+  jobId: string;
+};
 
 const JobApplicationDialog = ({
   open,
   onClose,
   jobTitle = "Full Stack Developer",
   companyName = "Acme Corp",
+  jobId,
 }: JobApplicationDialogProps) => {
+  const { data: userResumes, isLoading: isLoadingResumes } =
+    useGetUserResumeList(open);
+
+  const { mutate: createJobApplication, isPending: isCreatingJobApplication } =
+    useCreateJobApplication();
+
   const [coverLetter, setCoverLetter] = useState("");
   const [resumeMode, setResumeMode] = useState<"saved" | "upload">("saved");
-  const [selectedResumeId, setSelectedResumeId] = useState<string>(
-    mockSavedResumes[0]?.id ?? "",
-  );
+  const [selectedResumeId, setSelectedResumeId] = useState<string | null>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = (file: File) => {
@@ -99,27 +86,44 @@ const JobApplicationDialog = ({
 
   const handleSubmit = () => {
     if (!isValid) return;
-    setIsSubmitting(true);
 
-    // Simulate submission
-    setTimeout(() => {
-      setIsSubmitting(false);
-      // Reset
-      setCoverLetter("");
-      setUploadedFile(null);
-      setSelectedResumeId(mockSavedResumes[0]?.id ?? "");
-      setResumeMode("saved");
-      onClose();
-    }, 1500);
+    const formData = new FormData();
+
+    formData.append("job_listing_id", jobId);
+    formData.append("cover_letter", coverLetter);
+
+    if (resumeMode === "upload" && uploadedFile) {
+      formData.append("resume", uploadedFile);
+    } else if (resumeMode === "saved" && selectedResumeId) {
+      formData.append("resume_id", selectedResumeId);
+    }
+
+    createJobApplication(formData, {
+      onSuccess: () => {
+        toast.success("Application submitted successfully!");
+        setCoverLetter("");
+        setUploadedFile(null);
+        setSelectedResumeId(null);
+        setResumeMode("saved");
+        onClose();
+      },
+      onError: (err) => {
+        toast.error(
+          getErrorMessage(err) ||
+            "Failed to submit application. Please try again.",
+        );
+      },
+    });
+  };
+
+  const handleOnchangeResumeMode = (mode: "saved" | "upload") => {
+    setResumeMode(mode);
+    setSelectedResumeId(null);
+    setUploadedFile(null);
   };
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={() => {
-        /* intentionally blocked — user must use Cancel or Submit */
-      }}
-    >
+    <Dialog open={open} onOpenChange={() => {}}>
       <DialogContent
         className="sm:max-w-lg p-0 gap-0 border border-slate-200 shadow-xl rounded-2xl overflow-hidden"
         onEscapeKeyDown={(e) => e.preventDefault()}
@@ -127,7 +131,7 @@ const JobApplicationDialog = ({
         onInteractOutside={(e) => e.preventDefault()}
         showCloseButton={false}
       >
-        <DialogHeader className="px-6 pt-6 pb-4 border-b border-slate-100 bg-gradient-to-br from-violet-50 to-white">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b border-slate-100 bg-linear-to-br from-violet-50 to-white">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-violet-600 flex items-center justify-center shrink-0 shadow-sm">
@@ -181,7 +185,7 @@ const JobApplicationDialog = ({
 
             <div className="inline-flex rounded-lg border border-slate-200 p-1 bg-slate-50 gap-1">
               <button
-                onClick={() => setResumeMode("saved")}
+                onClick={() => handleOnchangeResumeMode("saved")}
                 className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150 ${
                   resumeMode === "saved"
                     ? "bg-violet-600 text-white shadow-sm"
@@ -191,7 +195,7 @@ const JobApplicationDialog = ({
                 My Resumes
               </button>
               <button
-                onClick={() => setResumeMode("upload")}
+                onClick={() => handleOnchangeResumeMode("upload")}
                 className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150 ${
                   resumeMode === "upload"
                     ? "bg-violet-600 text-white shadow-sm"
@@ -202,75 +206,81 @@ const JobApplicationDialog = ({
               </button>
             </div>
 
-            {resumeMode === "saved" && (
-              <div className="space-y-2">
-                {mockSavedResumes.length === 0 ? (
-                  <div className="text-center py-6 border-2 border-dashed border-slate-200 rounded-xl">
-                    <FileText className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                    <p className="text-sm text-slate-400">No saved resumes.</p>
-                    <button
-                      onClick={() => setResumeMode("upload")}
-                      className="text-xs text-violet-600 hover:underline mt-1"
+            {resumeMode === "saved" &&
+              (isLoadingResumes ? (
+                <ResumeListSkeleton count={2} />
+              ) : (
+                <div className="space-y-2">
+                  {userResumes?.data.length === 0 ? (
+                    <div className="text-center py-6 border-2 border-dashed border-slate-200 rounded-xl">
+                      <FileText className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                      <p className="text-sm text-slate-400">
+                        No saved resumes.
+                      </p>
+                      <button
+                        onClick={() => handleOnchangeResumeMode("upload")}
+                        className="text-xs text-violet-600 hover:underline mt-1"
+                      >
+                        Upload one instead
+                      </button>
+                    </div>
+                  ) : (
+                    <RadioGroup
+                      value={selectedResumeId}
+                      onValueChange={setSelectedResumeId}
+                      className="space-y-2"
                     >
-                      Upload one instead
-                    </button>
-                  </div>
-                ) : (
-                  <RadioGroup
-                    value={selectedResumeId}
-                    onValueChange={setSelectedResumeId}
-                    className="space-y-2"
-                  >
-                    {mockSavedResumes.map((resume) => {
-                      const isSelected = selectedResumeId === resume.id;
-                      return (
-                        <label
-                          key={resume.id}
-                          htmlFor={resume.id}
-                          className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all duration-150 ${
-                            isSelected
-                              ? "border-violet-400 bg-violet-50 shadow-sm"
-                              : "border-slate-200 bg-white hover:border-violet-200 hover:bg-violet-50/40"
-                          }`}
-                        >
-                          <RadioGroupItem
-                            value={resume.id}
-                            id={resume.id}
-                            className="sr-only"
-                          />
-
-                          <div
-                            className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                              isSelected ? "bg-violet-600" : "bg-slate-100"
+                      {userResumes?.data.map((resume) => {
+                        const isSelected = selectedResumeId === resume.id;
+                        return (
+                          <label
+                            key={resume.id}
+                            htmlFor={resume.id}
+                            className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all duration-150 ${
+                              isSelected
+                                ? "border-violet-400 bg-violet-50 shadow-sm"
+                                : "border-slate-200 bg-white hover:border-violet-200 hover:bg-violet-50/40"
                             }`}
                           >
-                            <FileText
-                              className={`w-4 h-4 ${
-                                isSelected ? "text-white" : "text-slate-400"
-                              }`}
+                            <RadioGroupItem
+                              value={resume.id}
+                              id={resume.id}
+                              className="sr-only"
                             />
-                          </div>
 
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-slate-800 truncate">
-                              {resume.name}
-                            </p>
-                            <p className="text-xs text-slate-400 mt-0.5">
-                              {formatSize(resume.size)} · {resume.uploadedAt}
-                            </p>
-                          </div>
+                            <div
+                              className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                                isSelected ? "bg-violet-600" : "bg-slate-100"
+                              }`}
+                            >
+                              <FileText
+                                className={`w-4 h-4 ${
+                                  isSelected ? "text-white" : "text-slate-400"
+                                }`}
+                              />
+                            </div>
 
-                          {/* Selected indicator */}
-                          {isSelected && (
-                            <CheckCircle2 className="w-4 h-4 text-violet-600 shrink-0" />
-                          )}
-                        </label>
-                      );
-                    })}
-                  </RadioGroup>
-                )}
-              </div>
-            )}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-slate-800 truncate">
+                                {resume.file_name}
+                              </p>
+                              <p className="text-xs text-slate-400 mt-0.5">
+                                {formatSize(Number(resume.file_size))} ·{" "}
+                                {formatDate(resume.created_at)}
+                              </p>
+                            </div>
+
+                            {/* Selected indicator */}
+                            {isSelected && (
+                              <CheckCircle2 className="w-4 h-4 text-violet-600 shrink-0" />
+                            )}
+                          </label>
+                        );
+                      })}
+                    </RadioGroup>
+                  )}
+                </div>
+              ))}
 
             {/* Upload new */}
             {resumeMode === "upload" && (
@@ -353,7 +363,7 @@ const JobApplicationDialog = ({
               variant="outline"
               size="sm"
               onClick={onClose}
-              disabled={isSubmitting}
+              disabled={isCreatingJobApplication}
               className="border-slate-200 text-slate-600 hover:bg-slate-100 h-8 text-xs"
             >
               Cancel
@@ -361,10 +371,10 @@ const JobApplicationDialog = ({
             <Button
               size="sm"
               onClick={handleSubmit}
-              disabled={!isValid || isSubmitting}
-              className="bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white gap-1.5 h-8 text-xs min-w-[110px]"
+              disabled={!isValid || isCreatingJobApplication}
+              className="bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white gap-1.5 h-8 text-xs min-w-27.5"
             >
-              {isSubmitting ? (
+              {isCreatingJobApplication ? (
                 <>
                   <div className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
                   Submitting…

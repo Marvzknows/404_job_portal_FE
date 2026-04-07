@@ -3,6 +3,7 @@ import { token } from "./token";
 
 export type ApiErrorResponse = {
   message: string;
+  errors?: Record<string, string[]>;
 };
 
 const api = axios.create({

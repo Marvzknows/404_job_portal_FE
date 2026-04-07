@@ -78,13 +78,14 @@ export type JobApplicationListT = {
   job_listing: {
     id: string;
     title: string;
+    location: string;
   };
   job_seeker: {
     id: string;
     full_name: string;
     email: string;
     current_job_title: string;
-    avatar_url: string | null;
+    avatar_url: FilesT;
   };
 };
 

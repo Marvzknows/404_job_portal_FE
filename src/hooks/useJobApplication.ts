@@ -34,3 +34,10 @@ export const useUpdateApplicationStatus = () => {
     mutationFn: jobApplicationService.updateApplicationApi,
   });
 };
+
+export const useCreateJobApplication = () => {
+  return useMutation<void, AxiosError<ApiErrorResponse>, FormData>({
+    mutationFn: (formData) =>
+      jobApplicationService.createApplicationApi(formData),
+  });
+};

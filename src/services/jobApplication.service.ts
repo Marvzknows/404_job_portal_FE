@@ -6,6 +6,8 @@ export type JobApplicationListParamsT = {
   per_page?: number;
   search?: string;
   status?: string;
+  work_setup?: string;
+  job_type?: string;
 };
 
 export type UpdateApplicationStatusPayloadT = {
@@ -30,6 +32,15 @@ export const jobApplicationService = {
       { status: payload.status },
     );
 
+    return res.data;
+  },
+
+  createApplicationApi: async (formData: FormData) => {
+    const res = await api.post(`/job-application`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     return res.data;
   },
 };
