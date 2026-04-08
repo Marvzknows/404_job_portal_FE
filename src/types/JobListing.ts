@@ -16,6 +16,7 @@ export type JobListingT = {
   location: string;
   total_applicants: number;
   is_applied: boolean;
+  is_saved: boolean;
   created_at: string;
   updated_at: string;
 };
