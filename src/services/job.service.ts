@@ -81,4 +81,9 @@ export const jobService = {
     const res = await api.post("/saved-jobs", payload);
     return res.data;
   },
+
+  unsaveJobListApi: async (jobId: string) => {
+    const res = await api.delete(`/saved-jobs/${jobId}`);
+    return res.data;
+  },
 };

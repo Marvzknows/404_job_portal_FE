@@ -78,3 +78,9 @@ export const useSaveJobList = () => {
     mutationFn: (payload) => jobService.saveJobListApi(payload),
   });
 };
+
+export const useUnsaveSaveJobList = () => {
+  return useMutation<void, AxiosError<ApiErrorResponse>, string>({
+    mutationFn: (jobId) => jobService.unsaveJobListApi(jobId),
+  });
+};

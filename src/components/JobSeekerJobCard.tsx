@@ -21,7 +21,7 @@ type JobSeekerJobCardProps = {
   href: string;
   handleApply: (jobId: string, jobTitle: string, companyName: string) => void;
   isApplied?: boolean;
-  handleSave: (jobId: string) => void;
+  handleSave: (jobId: string, isSaved: boolean) => void;
   isSaved?: boolean;
   isSaving?: boolean;
 };
@@ -69,7 +69,7 @@ const JobSeekerJobCard = ({
 
           <button
             disabled={isSaving}
-            onClick={() => handleSave(id)}
+            onClick={() => handleSave(id, isSaved)}
             className="p-1.5 rounded-md hover:bg-violet-50 transition cursor-pointer"
           >
             <Bookmark
