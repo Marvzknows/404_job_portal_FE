@@ -35,6 +35,14 @@ export type SaveJobApplicationPayload = {
   job_id: string;
 };
 
+export type SavedJobListParamsT = {
+  search?: string;
+  date_from?: string;
+  date_to?: string;
+  per_page?: number;
+  page?: number;
+};
+
 export const jobService = {
   createJob: async (payload: CreateJobFormT) => {
     const res = await api.post("/employer/jobs", payload);
@@ -84,6 +92,11 @@ export const jobService = {
 
   unsaveJobListApi: async (jobId: string) => {
     const res = await api.delete(`/saved-jobs/${jobId}`);
+    return res.data;
+  },
+
+  getSavedJobListApi: async (params?: SavedJobListParamsT) => {
+    const res = await api.get("/saved-jobs/list", { params });
     return res.data;
   },
 };
