@@ -1,13 +1,41 @@
 "use client";
 
+import AppAlertDialog from "@/components/AppAlertDialog";
 import SavedJobCard from "@/components/Employer/JobListing/SavedJobCard";
+import JobApplicationDialog from "@/components/JobSeeker/JobApplication/JobApplicationDialog";
 import PageHeader from "@/components/PageHeader";
+import { useAuth } from "@/context/AuthProvider";
 import { getErrorMessage } from "@/helpers/helpers";
 import { useSavedGetJobList, useUnsaveSaveJobList } from "@/hooks/useJob";
+import { useState } from "react";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import PaginationComponent from "@/components/PaginationComponent";
+import { SavedJobListParamsT } from "@/services/job.service";
 
 const SavedJobs = () => {
-  const { data, isPending, isError, refetch } = useSavedGetJobList();
+  const router = useRouter();
+  const [params, setParams] = useState<SavedJobListParamsT>({
+    search: "",
+    date_from: "",
+    date_to: "",
+    per_page: 6,
+    page: 1,
+  });
+
+  const { data, isLoading, isError, refetch } = useSavedGetJobList({
+    ...params,
+  });
+
+  const { profile } = useAuth();
+  const [open, setOpen] = useState(false);
+  const [createApplicationForm, setCreateApplicationForm] = useState({
+    jobTitle: "",
+    companyName: "",
+  });
+  const [jobApplicationId, setJobApplicationId] = useState("");
+  const [openNoProfile, setOpenNoProfile] = useState(false);
+
   const { mutate: unsaveJobAction, isPending: isUnsaving } =
     useUnsaveSaveJobList();
 
@@ -27,6 +55,23 @@ const SavedJobs = () => {
     });
   };
 
+  const handleApply = (
+    jobId: string,
+    jobTitle: string,
+    companyName: string,
+  ) => {
+    if (!profile) {
+      setOpenNoProfile(true);
+      return;
+    }
+    setOpen(true);
+    setJobApplicationId(jobId);
+    setCreateApplicationForm({
+      jobTitle,
+      companyName,
+    });
+  };
+
   return (
     <div className="flex flex-col gap-4">
       <PageHeader
@@ -34,7 +79,7 @@ const SavedJobs = () => {
         subHeaderTitle="Manage your saved jobs here"
       />
 
-      {isPending ? (
+      {isLoading ? (
         <p>Loading...</p>
       ) : data?.data.data.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 border-2 border-dashed border-slate-200 rounded-xl bg-white text-center">
@@ -55,12 +100,39 @@ const SavedJobs = () => {
               key={savedJob.id}
               savedJob={savedJob}
               handleUnsave={handleUnsave}
-              onApply={(jobListingId) => alert("apply" + jobListingId)}
               isUnsaving={isUnsaving}
+              handleApply={handleApply}
             />
           ))}
         </div>
       )}
+
+      {data?.data.meta && !isLoading && (
+        <PaginationComponent
+          meta={data.data.meta}
+          onPageChange={(page) => setParams((prev) => ({ ...prev, page }))}
+        />
+      )}
+
+      <JobApplicationDialog
+        open={open}
+        onClose={() => setOpen(false)}
+        jobTitle={createApplicationForm.jobTitle}
+        companyName={createApplicationForm.companyName}
+        jobId={jobApplicationId}
+      />
+
+      <AppAlertDialog
+        open={openNoProfile}
+        onOpenChange={setOpenNoProfile}
+        title={"Let’s Set Up Your Profile"}
+        description={
+          "It looks like you don’t have a profile yet. Create one to get started and unlock all features."
+        }
+        confirmText={"Set Up Profile"}
+        onConfirm={() => router.push("/job-seeker/profile")}
+        onCancel={() => setOpen(false)}
+      />
     </div>
   );
 };

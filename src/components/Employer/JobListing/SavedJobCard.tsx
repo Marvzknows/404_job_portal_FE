@@ -27,15 +27,15 @@ const workSetupColor: Record<string, string> = {
 type Props = {
   savedJob: SavedJobListT;
   handleUnsave: (jobListingId: string) => void;
-  onApply?: (jobListingId: string) => void;
   isUnsaving?: boolean;
+  handleApply: (jobId: string, jobTitle: string, companyName: string) => void;
 };
 
 const SavedJobCard = ({
   savedJob,
   handleUnsave,
-  onApply,
   isUnsaving = false,
+  handleApply,
 }: Props) => {
   const {
     // id: savedJobId,
@@ -46,6 +46,17 @@ const SavedJobCard = ({
   } = savedJob;
 
   const isClosed = job_listing?.status == "closed";
+
+  const handleApplyClick = () => {
+    if (is_applied || isClosed || !job_listing) return;
+
+    handleApply(
+      job_listing.id,
+      job_listing.title,
+      job_listing.employer?.company_name ?? "",
+    );
+  };
+
   return (
     <div
       className={`bg-white border rounded-xl shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md flex flex-col ${
@@ -183,7 +194,7 @@ const SavedJobCard = ({
 
             <Button
               size="sm"
-              onClick={() => !is_applied && onApply?.(job_listing?.id ?? "")}
+              onClick={handleApplyClick}
               disabled={is_applied || isClosed || isUnsaving}
               className={`gap-1.5 h-8 text-xs ${
                 is_applied
