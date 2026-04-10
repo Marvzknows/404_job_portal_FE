@@ -27,7 +27,6 @@ export type SavedJobListT = {
   created_at: string;
   updated_at: string;
   job_listing: JobListingT | null;
-  employer: EmployerProfileDataT | null;
   is_applied: boolean;
 };
 
