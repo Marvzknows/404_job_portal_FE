@@ -42,3 +42,10 @@ export type EmployerActivityLogT = {
 
 export type PaginatedEmployerActivityLog =
   ApiPaginatedResponse<EmployerActivityLogT>;
+
+export type EmployerDashboardStatsT = {
+  active_jobs: number;
+  total_applicants: number;
+  pending_review: number;
+  shortlisted: number;
+};

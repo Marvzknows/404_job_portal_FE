@@ -4,6 +4,7 @@ import AuthGuard from "@/components/auth/AuthGuard";
 import EmployerNavbar from "@/components/auth/EmployerNavbar";
 import EmployerDashboardCard from "@/components/Employer/EmployerDashboardCard";
 import { useAuth } from "@/context/AuthProvider";
+import { useGetEmployerStats } from "@/hooks/useDashboard";
 import { Briefcase, CheckCircle2, Clock, Users } from "lucide-react";
 
 export default function EmployerLayout({
@@ -12,25 +13,26 @@ export default function EmployerLayout({
   children: React.ReactNode;
 }) {
   const { user } = useAuth();
+  const { data, isLoading } = useGetEmployerStats();
   const statsCard = [
     {
       label: "Active Jobs",
-      value: "12",
+      value: data?.active_jobs ?? 0,
       icon: Briefcase,
     },
     {
       label: "Total Applicants",
-      value: "156",
+      value: data?.total_applicants ?? 0,
       icon: Users,
     },
     {
       label: "Pending Review",
-      value: "43",
+      value: data?.pending_review ?? 0,
       icon: Clock,
     },
     {
       label: "Shortlisted",
-      value: "18",
+      value: data?.shortlisted ?? 0,
       icon: CheckCircle2,
     },
   ];
@@ -51,6 +53,7 @@ export default function EmployerLayout({
               label={card.label}
               value={card.value}
               icon={card.icon}
+              isLoading={isLoading}
             />
           ))}
         </div>
