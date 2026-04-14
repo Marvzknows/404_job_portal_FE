@@ -49,3 +49,10 @@ export type EmployerDashboardStatsT = {
   pending_review: number;
   shortlisted: number;
 };
+
+export type JobSeekerDashboardStatsT = {
+  total_applicants: number;
+  pending_review: number;
+  shortlisted_accepted: number;
+  saved_jobs: number;
+};

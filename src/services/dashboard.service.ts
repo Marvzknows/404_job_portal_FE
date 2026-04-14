@@ -22,4 +22,9 @@ export const dashBoardStatsService = {
     const res = await api.get("employer/dashboard/stats");
     return res.data;
   },
+
+  getJobSeekerStatsApi: async () => {
+    const res = await api.get(`job_seeker/dashboard/stats`);
+    return res.data;
+  },
 };

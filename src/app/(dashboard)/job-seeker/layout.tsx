@@ -3,6 +3,7 @@ import AuthGuard from "@/components/auth/AuthGuard";
 import JobSeekerNavbar from "@/components/auth/JobSeekerNavbar";
 import EmployerDashboardCard from "@/components/Employer/EmployerDashboardCard";
 import { useAuth } from "@/context/AuthProvider";
+import { useGetJobSeekerStats } from "@/hooks/useDashboard";
 import { Bookmark, Calendar, Clock, Send } from "lucide-react";
 
 export default function JobSeekerLayout({
@@ -11,25 +12,26 @@ export default function JobSeekerLayout({
   children: React.ReactNode;
 }) {
   const { user } = useAuth();
+  const { data, isLoading } = useGetJobSeekerStats();
   const statsCard = [
     {
-      label: "Applications",
-      value: "12",
+      label: "Total Applications (last 7 days)",
+      value: data?.total_applicants ?? 0,
       icon: Send,
     },
     {
-      label: "In Progress",
-      value: "156",
+      label: "Pending Review",
+      value: data?.pending_review ?? 0,
       icon: Clock,
     },
     {
-      label: "Interviews",
-      value: "43",
+      label: "Shortlisted / Accepted",
+      value: data?.shortlisted_accepted ?? 0,
       icon: Calendar,
     },
     {
       label: "Saved Jobs",
-      value: "18",
+      value: data?.saved_jobs ?? 0,
       icon: Bookmark,
     },
   ];
@@ -48,6 +50,7 @@ export default function JobSeekerLayout({
               label={card.label}
               value={card.value}
               icon={card.icon}
+              isLoading={isLoading}
             />
           ))}
         </div>
