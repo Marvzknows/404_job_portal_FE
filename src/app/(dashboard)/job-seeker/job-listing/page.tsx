@@ -6,13 +6,19 @@ import PageHeader from "@/components/PageHeader";
 import JobApplicationDialog from "@/components/JobSeeker/JobApplication/JobApplicationDialog";
 import { useState } from "react";
 import useDebounce from "@/hooks/useDebounce";
-import { useGetJobList } from "@/hooks/useJob";
+import {
+  useGetJobList,
+  useSaveJobList,
+  useUnsaveSaveJobList,
+} from "@/hooks/useJob";
 import JobSeekerJobCardSkeleton from "@/components/JobSeekerJobCardSkeleton";
 import PaginationComponent from "@/components/PaginationComponent";
 import { JobListParamsT } from "@/services/job.service";
 import { useAuth } from "@/context/AuthProvider";
 import AppAlertDialog from "@/components/AppAlertDialog";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { getErrorMessage } from "@/helpers/helpers";
 
 const JobSeekerJobListingPage = () => {
   const { profile } = useAuth();
@@ -36,10 +42,16 @@ const JobSeekerJobListingPage = () => {
 
   const debouncedSearch = useDebounce(search);
 
-  const { data, isLoading } = useGetJobList({
+  const { data, isLoading, refetch } = useGetJobList({
     ...params,
     search: debouncedSearch,
   });
+
+  const { mutate: saveJobAction, isPending: isSaving } = useSaveJobList();
+  const { mutate: unsaveJobAction, isPending: isUnsaving } =
+    useUnsaveSaveJobList();
+
+  const isPending = isSaving || isUnsaving;
 
   const handleApply = (
     jobId: string,
@@ -69,6 +81,32 @@ const JobSeekerJobListingPage = () => {
       [filterName]: filterValue,
       page: 1,
     }));
+  };
+
+  const handleSave = (jobId: string, isSaved: boolean) => {
+    if (!jobId) return;
+    if (isSaved) {
+      unsaveJobAction(jobId, {
+        onSuccess: () => {
+          refetch();
+          toast.success("Job unsaved");
+        },
+        onError: (err) =>
+          toast.error(getErrorMessage(err, "Removing Saved job failed")),
+      });
+    } else {
+      saveJobAction(
+        { job_id: jobId },
+        {
+          onSuccess: () => {
+            refetch();
+            toast.success("Job saved");
+          },
+          onError: (err) =>
+            toast.error(getErrorMessage(err, "Saving job failed")),
+        },
+      );
+    }
   };
 
   return (
@@ -109,6 +147,9 @@ const JobSeekerJobListingPage = () => {
               companyLogo={job.employer.logo?.url}
               isApplied={job.is_applied}
               handleApply={handleApply}
+              handleSave={handleSave}
+              isSaved={job.is_saved}
+              isSaving={isPending}
             />
           ))}
         </div>

@@ -21,6 +21,9 @@ type JobSeekerJobCardProps = {
   href: string;
   handleApply: (jobId: string, jobTitle: string, companyName: string) => void;
   isApplied?: boolean;
+  handleSave: (jobId: string, isSaved: boolean) => void;
+  isSaved?: boolean;
+  isSaving?: boolean;
 };
 
 const JobSeekerJobCard = ({
@@ -37,6 +40,9 @@ const JobSeekerJobCard = ({
   href,
   handleApply,
   isApplied = false,
+  handleSave,
+  isSaved = false,
+  isSaving = false,
 }: JobSeekerJobCardProps) => {
   return (
     <>
@@ -61,8 +67,18 @@ const JobSeekerJobCard = ({
             </div>
           </div>
 
-          <button className="p-1.5 rounded-md hover:bg-violet-50 transition">
-            <Bookmark className="w-4 h-4 text-violet-500" />
+          <button
+            disabled={isSaving}
+            onClick={() => handleSave(id, isSaved)}
+            className="p-1.5 rounded-md hover:bg-violet-50 transition cursor-pointer"
+          >
+            <Bookmark
+              className={`w-4 h-4 ${
+                isSaved
+                  ? "text-violet-600 fill-violet-600"
+                  : "text-violet-500 group-hover:text-violet-500"
+              }`}
+            />
           </button>
         </div>
 

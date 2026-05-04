@@ -16,3 +16,15 @@ export const dashBoardService = {
     return res.data;
   },
 };
+
+export const dashBoardStatsService = {
+  getEmployerStatsApi: async () => {
+    const res = await api.get("employer/dashboard/stats");
+    return res.data;
+  },
+
+  getJobSeekerStatsApi: async () => {
+    const res = await api.get(`job_seeker/dashboard/stats`);
+    return res.data;
+  },
+};

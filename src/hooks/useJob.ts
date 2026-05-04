@@ -5,8 +5,14 @@ import {
   EmployerJobStatus,
   JobListParamsT,
   jobService,
+  SavedJobListParamsT,
+  SaveJobApplicationPayload,
 } from "@/services/job.service";
-import { JobDetailResponseT, JobListingListT } from "@/types/JobListing";
+import {
+  JobDetailResponseT,
+  JobListingListT,
+  SavedJobListingListT,
+} from "@/types/JobListing";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 
@@ -64,6 +70,30 @@ export const useGetJobList = (params?: JobListParamsT) => {
   return useQuery<JobListingListT>({
     queryKey: ["jobList", params],
     queryFn: () => jobService.getJobListApi(params),
+    refetchInterval: 10000,
+  });
+};
+
+export const useSaveJobList = () => {
+  return useMutation<
+    void,
+    AxiosError<ApiErrorResponse>,
+    SaveJobApplicationPayload
+  >({
+    mutationFn: (payload) => jobService.saveJobListApi(payload),
+  });
+};
+
+export const useUnsaveSaveJobList = () => {
+  return useMutation<void, AxiosError<ApiErrorResponse>, string>({
+    mutationFn: (jobId) => jobService.unsaveJobListApi(jobId),
+  });
+};
+
+export const useSavedGetJobList = (params?: SavedJobListParamsT) => {
+  return useQuery<SavedJobListingListT>({
+    queryKey: ["savedJobList", params],
+    queryFn: () => jobService.getSavedJobListApi(params),
     refetchInterval: 10000,
   });
 };

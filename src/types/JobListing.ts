@@ -16,11 +16,22 @@ export type JobListingT = {
   location: string;
   total_applicants: number;
   is_applied: boolean;
+  is_saved: boolean;
   created_at: string;
   updated_at: string;
 };
 
+export type SavedJobListT = {
+  id: string;
+  job_listing_id: string;
+  created_at: string;
+  updated_at: string;
+  job_listing: JobListingT | null;
+  is_applied: boolean;
+};
+
 export type JobListingListT = ApiPaginatedResponse<JobListingT>;
+export type SavedJobListingListT = ApiPaginatedResponse<SavedJobListT>;
 
 export const STATUS_STYLES: Record<string, string> = {
   open: "bg-emerald-50 text-emerald-700 border-emerald-200",

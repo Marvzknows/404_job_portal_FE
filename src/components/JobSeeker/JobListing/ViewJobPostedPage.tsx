@@ -77,7 +77,6 @@ type Props = { id: string };
 
 const ViewJobPostedPage = ({ id }: Props) => {
   const { data, isLoading } = useViewPublicJobDetails(id);
-  console.log(data);
   if (isLoading) {
     return <ViewJobPostedPageSkeleton />;
   }
