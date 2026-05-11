@@ -1,0 +1,202 @@
+"use client";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { User } from "lucide-react";
+import {
+  ApplicationListT,
+  ApplicationStatusT,
+  JobApplicationListT,
+} from "@/types/JobApplication";
+import { HeaderType } from "../DataTable";
+import Image from "next/image";
+import Link from "next/link";
+import { formatDate } from "@/helpers/helpers";
+
+const statusConfig: Record<
+  ApplicationStatusT,
+  { label: string; className: string }
+> = {
+  pending: {
+    label: "Pending",
+    className:
+      "bg-yellow-100 text-yellow-700 border-yellow-200 hover:bg-yellow-200",
+  },
+  viewed: {
+    label: "Viewed",
+    className: "bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200",
+  },
+  shortlisted: {
+    label: "Shortlisted",
+    className:
+      "bg-purple-100 text-purple-700 border-purple-200 hover:bg-purple-200",
+  },
+  accepted: {
+    label: "Accepted",
+    className:
+      "bg-green-100 text-green-700 border-green-200 hover:bg-green-200",
+  },
+  rejected: {
+    label: "Rejected",
+    className: "bg-red-100 text-red-700 border-red-200 hover:bg-red-200",
+  },
+  withdrawn: {
+    label: "Withdrawn",
+    className: "bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200",
+  },
+};
+
+const CandidateAvatar = ({ src, name }: { src?: string; name: string }) => {
+  if (src) {
+    return (
+      <Image
+        src={src}
+        alt={name}
+        width={50}
+        height={50}
+        className="rounded-full object-cover border border-gray-200"
+        unoptimized
+      />
+    );
+  }
+  return (
+    <div className="w-9 h-9 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center shrink-0">
+      <User className="w-4 h-4 text-gray-400" />
+    </div>
+  );
+};
+
+export const EmployerJobApplicationColumn =
+  (): HeaderType<JobApplicationListT>[] => {
+    return [
+      {
+        key: "candidateName",
+        label: "Candidate",
+        className: "min-w-[220px]",
+        render: (row) => (
+          <div className="flex items-center gap-3">
+            <CandidateAvatar
+              src={row?.job_seeker?.avatar_url?.url ?? ""}
+              name={row.job_seeker.full_name}
+            />
+            <div className="flex flex-col">
+              <span className="text-sm font-semibold text-gray-800 leading-tight">
+                {row.job_seeker.full_name}
+              </span>
+              <span className="text-xs text-gray-400 mt-0.5">
+                {row.job_seeker.email}
+              </span>
+            </div>
+          </div>
+        ),
+      },
+      {
+        key: "jobPosition",
+        label: "Job Position",
+        className: "min-w-[180px]",
+        render: (row) => (
+          <span className="text-sm text-gray-600">{row.job_listing.title}</span>
+        ),
+      },
+      {
+        key: "appliedDate",
+        label: "Applied Date",
+        className: "min-w-[120px]",
+        render: (row) => (
+          <span className="text-sm text-gray-500">
+            {formatDate(row.date_applied)}
+          </span>
+        ),
+      },
+      {
+        key: "status",
+        label: "Status",
+        className: "min-w-[120px]",
+        render: (row) => {
+          const config = statusConfig[row.status];
+          return (
+            <Badge
+              variant="outline"
+              className={`text-xs font-medium px-3 py-1 rounded-full border ${config.className}`}
+            >
+              {config.label}
+            </Badge>
+          );
+        },
+      },
+      {
+        key: "actions",
+        label: "Actions",
+        className: "min-w-[180px]",
+        render: (row) => (
+          <div className="flex items-center gap-2">
+            <Link href={`/employer/applications/${row.id}`}>
+              <Button
+                size="sm"
+                className="h-8 px-4 text-xs font-medium bg-blue-500 hover:bg-blue-600 text-white rounded-md"
+              >
+                View
+              </Button>
+            </Link>
+          </div>
+        ),
+      },
+    ];
+  };
+
+export const ApplicationListInvoices: ApplicationListT[] = [
+  {
+    id: "1",
+    avatarUrl: "https://i.pravatar.cc/150?img=1",
+    applicantName: "Juan Dela Cruz",
+    email: "juan.delacruz@gmail.com",
+    jobTitle: "Frontend Developer",
+    appliedDate: "Feb 15, 2026",
+    status: "pending",
+  },
+  {
+    id: "2",
+    avatarUrl: "https://i.pravatar.cc/150?img=2",
+    applicantName: "Maria Santos",
+    email: "maria.santos@gmail.com",
+    jobTitle: "UI/UX Designer",
+    appliedDate: "Feb 16, 2026",
+    status: "viewed",
+  },
+  {
+    id: "3",
+    avatarUrl: "https://i.pravatar.cc/150?img=3",
+    applicantName: "James Rodriguez",
+    email: "james.rodriguez@gmail.com",
+    jobTitle: "React Engineer",
+    appliedDate: "Feb 17, 2026",
+    status: "shortlisted",
+  },
+  {
+    id: "4",
+    avatarUrl: "https://i.pravatar.cc/150?img=4",
+    applicantName: "Angela Lim",
+    email: "angela.lim@gmail.com",
+    jobTitle: "Frontend Engineer",
+    appliedDate: "Feb 18, 2026",
+    status: "accepted",
+  },
+  {
+    id: "5",
+    avatarUrl: "https://i.pravatar.cc/150?img=5",
+    applicantName: "Michael Tan",
+    email: "michael.tan@gmail.com",
+    jobTitle: "Junior Web Developer",
+    appliedDate: "Feb 19, 2026",
+    status: "rejected",
+  },
+  {
+    id: "6",
+    avatarUrl: "https://i.pravatar.cc/150?img=6",
+    applicantName: "Sofia Reyes",
+    email: "sofia.reyes@gmail.com",
+    jobTitle: "Next.js Developer",
+    appliedDate: "Feb 20, 2026",
+    status: "withdrawn",
+  },
+];
