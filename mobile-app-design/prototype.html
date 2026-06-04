@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>404 Jobs — Mobile App UI Prototype</title>
+<style>
+  /* ============================================================
+     404 Jobs — React Native mobile UI reference prototype
+     Design tokens mirrored from the web codebase (Tailwind v4 + shadcn)
+     ============================================================ */
+  :root{
+    --violet-50:#f5f3ff; --violet-100:#ede9fe; --violet-200:#ddd6fe;
+    --violet-400:#a78bfa; --violet-500:#8b5cf6; --violet-600:#7c3aed;
+    --violet-700:#6d28d9; --indigo-600:#4f46e5; --indigo-700:#4338ca;
+    --fg:#171717; --muted:#737373; --border:#f1f1f1; --border-2:#e5e5e5;
+    --bg:#ffffff; --page:#f4f4f6;
+    --amber-50:#fffbeb; --amber-200:#fde68a; --amber-700:#b45309;
+    --blue-50:#eff6ff;  --blue-200:#bfdbfe;  --blue-700:#1d4ed8;
+    --green-50:#f0fdf4; --green-200:#bbf7d0; --green-700:#15803d;
+    --emerald-50:#ecfdf5;--emerald-200:#a7f3d0;--emerald-700:#047857;
+    --rose-50:#fff1f2;  --rose-200:#fecdd3;  --rose-700:#be123c;
+    --gray-100:#f5f5f5; --gray-200:#e5e5e5; --gray-600:#525252;
+    --radius:14px;
+    --shadow-sm:0 1px 2px rgba(0,0,0,.05);
+    --shadow-md:0 4px 14px rgba(124,58,237,.10);
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:var(--font);background:var(--page);color:var(--fg);-webkit-font-smoothing:antialiased;}
+
+  /* ---- page chrome ---- */
+  .doc-header{padding:40px 24px 8px;text-align:center;}
+  .doc-header h1{font-size:30px;font-weight:800;letter-spacing:-.02em;}
+  .doc-header h1 .grad{background:linear-gradient(90deg,var(--violet-600),var(--indigo-600));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .doc-header p{color:var(--muted);margin-top:8px;font-size:14px;max-width:680px;margin-left:auto;margin-right:auto;}
+  .legend{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:18px auto 6px;max-width:760px;}
+  .legend .chip{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;padding:5px 11px;border-radius:999px;border:1px solid var(--violet-200);background:var(--violet-50);color:var(--violet-700);}
+  .swatches{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:10px auto 0;}
+  .sw{width:30px;height:30px;border-radius:8px;border:1px solid rgba(0,0,0,.06);}
+  .print-tip{font-size:12px;color:var(--muted);text-align:center;margin:16px 0 0;}
+
+  .section-title{max-width:1240px;margin:46px auto 4px;padding:0 24px;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--violet-600);display:flex;align-items:center;gap:10px;}
+  .section-title:before{content:"";width:26px;height:2px;background:var(--violet-600);border-radius:2px;}
+  .section-sub{max-width:1240px;margin:0 auto 8px;padding:0 24px;font-size:13px;color:var(--muted);}
+
+  /* ---- phone grid ---- */
+  .grid{display:flex;flex-wrap:wrap;gap:34px 30px;justify-content:center;max-width:1240px;margin:22px auto 0;padding:0 24px;}
+  .screen{width:300px;}
+  .screen .cap{font-size:12.5px;font-weight:600;color:var(--fg);text-align:center;margin-bottom:10px;}
+  .screen .cap small{display:block;color:var(--muted);font-weight:400;font-size:11px;margin-top:2px;}
+
+  .phone{width:300px;height:640px;background:#000;border-radius:42px;padding:11px;box-shadow:0 18px 50px rgba(30,15,60,.22);position:relative;}
+  .phone .scr{width:100%;height:100%;background:var(--bg);border-radius:32px;overflow:hidden;position:relative;display:flex;flex-direction:column;}
+  .notch{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:118px;height:26px;background:#000;border-radius:0 0 16px 16px;z-index:30;}
+
+  /* status bar */
+  .statusbar{height:38px;flex:0 0 38px;display:flex;align-items:center;justify-content:space-between;padding:0 20px 0 22px;font-size:12px;font-weight:600;color:var(--fg);}
+  .statusbar.on-violet{color:#fff;}
+  .statusbar .dots{display:flex;gap:4px;align-items:center;}
+  .statusbar .dots svg{width:15px;height:11px;}
+
+  /* generic app bar */
+  .appbar{flex:0 0 auto;padding:6px 16px 12px;display:flex;align-items:center;gap:10px;}
+  .appbar .title{font-size:18px;font-weight:700;letter-spacing:-.01em;}
+  .appbar .sub{font-size:11px;color:var(--muted);}
+  .appbar .spacer{flex:1;}
+  .iconbtn{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--gray-600);background:transparent;position:relative;}
+  .iconbtn.ghost:hover{background:var(--gray-100);}
+  .dot{position:absolute;top:6px;right:7px;width:7px;height:7px;background:#ef4444;border-radius:50%;border:1.5px solid #fff;}
+
+  .body{flex:1;overflow:hidden;padding:0 14px;}
+  .body.scroll{overflow:auto;}
+  .body::-webkit-scrollbar{width:0;}
+
+  /* logo */
+  .brand{display:flex;align-items:center;gap:8px;}
+  .brand .mark{width:30px;height:30px;border-radius:9px;background:var(--violet-600);display:flex;align-items:center;justify-content:center;color:#fff;}
+  .brand .name{font-size:16px;font-weight:800;letter-spacing:-.01em;}
+
+  /* cards */
+  .card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:14px;}
+  .card + .card{margin-top:11px;}
+
+  /* job card */
+  .job-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;}
+  .logo{width:44px;height:44px;border-radius:11px;background:var(--violet-50);border:1px solid var(--violet-100);display:flex;align-items:center;justify-content:center;color:var(--violet-600);flex:0 0 44px;font-weight:800;font-size:15px;}
+  .job-title{font-size:14px;font-weight:700;line-height:1.25;}
+  .job-co{font-size:12px;color:var(--muted);margin-top:1px;}
+  .meta{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:11px;font-size:11.5px;color:var(--muted);}
+  .meta span{display:inline-flex;align-items:center;gap:5px;}
+  .meta svg{color:var(--violet-400);width:13px;height:13px;}
+  .tags{display:flex;gap:7px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);align-items:center;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;padding:4px 9px;border-radius:999px;border:1px solid var(--violet-200);background:var(--violet-50);color:var(--violet-700);}
+  .badge.green{background:var(--green-50);border-color:var(--green-200);color:var(--green-700);}
+  .badge.amber{background:var(--amber-50);border-color:var(--amber-200);color:var(--amber-700);}
+  .badge.blue{background:var(--blue-50);border-color:var(--blue-200);color:var(--blue-700);}
+  .badge.emerald{background:var(--emerald-50);border-color:var(--emerald-200);color:var(--emerald-700);}
+  .badge.rose{background:var(--rose-50);border-color:var(--rose-200);color:var(--rose-700);}
+  .badge.gray{background:var(--gray-100);border-color:var(--gray-200);color:var(--gray-600);}
+
+  /* buttons */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:12.5px;font-weight:600;padding:9px 14px;border-radius:10px;border:1px solid transparent;cursor:pointer;}
+  .btn.sm{padding:7px 11px;font-size:11.5px;}
+  .btn.primary{background:var(--violet-600);color:#fff;}
+  .btn.outline{background:#fff;border-color:var(--violet-200);color:var(--violet-700);}
+  .btn.full{width:100%;}
+  .btn.white{background:#fff;color:var(--violet-700);}
+  .btn-row{display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);justify-content:flex-end;}
+
+  /* search */
+  .search{display:flex;align-items:center;gap:8px;background:var(--gray-100);border:1px solid var(--border-2);border-radius:12px;padding:10px 12px;color:var(--muted);font-size:13px;}
+  .search svg{width:16px;height:16px;color:var(--violet-500);}
+  .filters{display:flex;gap:7px;margin:11px 0;overflow:hidden;}
+  .pill{font-size:11.5px;font-weight:600;padding:7px 12px;border-radius:999px;border:1px solid var(--border-2);color:var(--gray-600);background:#fff;white-space:nowrap;}
+  .pill.active{background:var(--violet-600);color:#fff;border-color:var(--violet-600);}
+
+  /* bottom tab bar */
+  .tabbar{flex:0 0 64px;border-top:1px solid var(--border-2);background:#fff;display:flex;padding:8px 6px 14px;}
+  .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:600;color:var(--muted);}
+  .tab svg{width:21px;height:21px;}
+  .tab.active{color:var(--violet-600);}
+
+  /* hero / welcome */
+  .hero{flex:1;background:linear-gradient(165deg,var(--violet-50),#fff 55%);display:flex;flex-direction:column;}
+  .hero .grad-card{margin:auto 16px;}
+  .hero-badge{display:inline-flex;align-items:center;gap:6px;align-self:center;font-size:10.5px;font-weight:600;padding:5px 11px;border-radius:999px;border:1px solid var(--violet-200);background:var(--violet-50);color:var(--violet-700);}
+  .hero h2{font-size:27px;font-weight:800;letter-spacing:-.02em;line-height:1.12;text-align:center;margin-top:18px;}
+  .hero h2 .grad{background:linear-gradient(90deg,var(--violet-600),var(--indigo-600));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .hero p{text-align:center;color:var(--muted);font-size:13px;margin-top:12px;line-height:1.5;}
+  .checks{margin-top:18px;display:flex;flex-direction:column;gap:9px;}
+  .checks span{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);}
+  .checks svg{color:var(--violet-500);width:15px;height:15px;flex:0 0 15px;}
+  .stats4{display:flex;gap:8px;margin-top:6px;}
+  .stat{flex:1;background:#fff;border:1px solid var(--border);border-radius:12px;padding:10px 6px;text-align:center;box-shadow:var(--shadow-sm);}
+  .stat b{display:block;font-size:18px;color:var(--violet-600);font-weight:800;}
+  .stat small{font-size:9.5px;color:var(--muted);}
+
+  /* forms */
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:12px;font-weight:600;margin-bottom:6px;}
+  .input{width:100%;border:1px solid var(--border-2);border-radius:10px;padding:11px 12px;font-size:13px;color:var(--fg);background:#fff;}
+  .input.ph{color:var(--muted);}
+  .form-foot{font-size:12px;color:var(--muted);text-align:center;margin-top:14px;}
+  .form-foot a{color:var(--violet-600);font-weight:600;}
+
+  /* role select */
+  .role{border:1.5px solid var(--border-2);border-radius:14px;padding:16px;display:flex;gap:12px;align-items:flex-start;}
+  .role.sel{border-color:var(--violet-600);background:var(--violet-50);}
+  .role .ic{width:42px;height:42px;border-radius:11px;background:var(--violet-50);color:var(--violet-600);display:flex;align-items:center;justify-content:center;flex:0 0 42px;}
+  .role.sel .ic{background:var(--violet-600);color:#fff;}
+  .role h4{font-size:14px;font-weight:700;}
+  .role p{font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.4;}
+  .radio{width:20px;height:20px;border-radius:50%;border:2px solid var(--border-2);flex:0 0 20px;margin-left:auto;display:flex;align-items:center;justify-content:center;}
+  .role.sel .radio{border-color:var(--violet-600);}
+  .role.sel .radio:after{content:"";width:10px;height:10px;border-radius:50%;background:var(--violet-600);}
+
+  /* dashboard stat cards */
+  .stat2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .stat-card{background:#fff;border:1px solid var(--border-2);border-radius:12px;padding:14px;box-shadow:var(--shadow-sm);display:flex;justify-content:space-between;align-items:flex-start;}
+  .stat-card .lbl{font-size:11px;color:var(--gray-600);}
+  .stat-card .val{font-size:24px;font-weight:800;margin-top:4px;}
+  .stat-card .ic{width:38px;height:38px;border-radius:11px;background:var(--violet-500);color:#fff;display:flex;align-items:center;justify-content:center;flex:0 0 38px;}
+
+  /* activity log */
+  .activity{display:flex;gap:11px;align-items:flex-start;padding:11px 2px;}
+  .activity .ai{width:34px;height:34px;border-radius:10px;background:var(--violet-50);color:var(--violet-600);display:flex;align-items:center;justify-content:center;flex:0 0 34px;}
+  .activity .at{font-size:12.5px;font-weight:600;}
+  .activity .ad{font-size:11px;color:var(--muted);margin-top:2px;}
+  .activity .time{font-size:10px;color:var(--muted);margin-top:3px;}
+  .sep{height:1px;background:var(--border);}
+
+  /* detail */
+  .detail-head{background:linear-gradient(160deg,var(--violet-600),var(--indigo-700));color:#fff;padding:16px 16px 22px;}
+  .detail-head .logo{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.25);color:#fff;}
+  .detail-head .job-title{color:#fff;font-size:17px;}
+  .detail-head .job-co{color:rgba(255,255,255,.85);}
+  .detail-head .meta{color:rgba(255,255,255,.9);}
+  .detail-head .meta svg{color:rgba(255,255,255,.8);}
+  .sec-h{font-size:13px;font-weight:700;margin:16px 0 7px;}
+  .para{font-size:12px;color:var(--gray-600);line-height:1.6;}
+  .para + .para{margin-top:8px;}
+  .ul{margin-top:8px;display:flex;flex-direction:column;gap:7px;}
+  .ul span{display:flex;gap:8px;font-size:12px;color:var(--gray-600);line-height:1.45;}
+  .ul svg{color:var(--violet-500);width:14px;height:14px;flex:0 0 14px;margin-top:2px;}
+
+  /* sticky action bar */
+  .sticky-cta{flex:0 0 auto;border-top:1px solid var(--border-2);background:#fff;padding:12px 14px;display:flex;gap:10px;align-items:center;}
+
+  /* bottom sheet (apply) */
+  .sheet-screen{flex:1;position:relative;background:rgba(20,10,40,.45);}
+  .sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:24px 24px 0 0;padding:18px 16px 20px;box-shadow:0 -8px 30px rgba(0,0,0,.2);}
+  .handle{width:40px;height:4px;border-radius:4px;background:var(--gray-200);margin:0 auto 14px;}
+  .resume-opt{border:1.5px solid var(--border-2);border-radius:12px;padding:13px;display:flex;align-items:center;gap:11px;}
+  .resume-opt.sel{border-color:var(--violet-600);background:var(--violet-50);}
+  .resume-opt + .resume-opt{margin-top:9px;}
+  .resume-opt .ic{width:36px;height:36px;border-radius:9px;background:var(--rose-50);color:var(--rose-700);display:flex;align-items:center;justify-content:center;flex:0 0 36px;}
+
+  /* profile */
+  .profile-head{display:flex;flex-direction:column;align-items:center;padding:10px 0 4px;}
+  .avatar{width:78px;height:78px;border-radius:50%;background:var(--violet-100);color:var(--violet-600);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;border:3px solid #fff;box-shadow:0 4px 14px rgba(124,58,237,.18);}
+  .profile-head h3{font-size:17px;font-weight:700;margin-top:10px;}
+  .profile-head p{font-size:12px;color:var(--muted);margin-top:2px;}
+  .fieldrow{display:flex;justify-content:space-between;gap:12px;padding:11px 0;font-size:12.5px;}
+  .fieldrow .k{color:var(--muted);}
+  .fieldrow .v{font-weight:600;text-align:right;}
+  .menu-item{display:flex;align-items:center;gap:12px;padding:13px 4px;font-size:13px;font-weight:500;}
+  .menu-item svg{width:18px;height:18px;color:var(--violet-600);}
+  .menu-item .chev{margin-left:auto;color:var(--muted);}
+  .menu-item.danger{color:var(--rose-700);}
+  .menu-item.danger svg{color:var(--rose-700);}
+
+  .seg{display:flex;background:var(--gray-100);border-radius:11px;padding:3px;margin-bottom:12px;}
+  .seg button{flex:1;border:none;background:transparent;font-size:12px;font-weight:600;padding:8px;border-radius:8px;color:var(--muted);}
+  .seg button.active{background:#fff;color:var(--violet-700);box-shadow:var(--shadow-sm);}
+
+  .applicant{display:flex;align-items:center;gap:11px;}
+  .applicant .av{width:42px;height:42px;border-radius:50%;background:var(--indigo-600);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex:0 0 42px;}
+
+  .fab{position:absolute;right:16px;bottom:80px;width:52px;height:52px;border-radius:16px;background:var(--violet-600);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 22px rgba(124,58,237,.4);z-index:20;}
+
+  /* default icon sizing per context (CSS overrides SVG width/height attrs) */
+  svg{display:inline-block;vertical-align:middle;stroke-width:2;}
+  .iconbtn svg{width:19px;height:19px;}
+  .brand .mark svg{width:16px;height:16px;}
+  .badge svg{width:12px;height:12px;}
+  .btn svg{width:15px;height:15px;}
+  .role .ic svg{width:20px;height:20px;}
+  .stat-card .ic svg{width:19px;height:19px;}
+  .activity .ai svg{width:17px;height:17px;}
+  .resume-opt .ic svg{width:18px;height:18px;}
+  .fab svg{width:24px;height:24px;}
+  .hero-badge svg{width:13px;height:13px;}
+  .detail-head .logo svg, .logo svg{width:18px;height:18px;}
+  .chev svg{width:16px;height:16px;}
+  .seg svg{width:14px;height:14px;}
+
+  @media print{
+    body{background:#fff;}
+    .phone{box-shadow:none;border:1px solid #ddd;}
+    .grid{gap:24px 18px;}
+    .doc-header{padding-top:10px;}
+    .print-tip{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<div class="doc-header">
+  <h1>404 Jobs — <span class="grad">Mobile App</span> UI Prototype</h1>
+  <p>A React Native design reference generated from the existing web codebase. Brand, color, spacing, and components mirror the production app (Tailwind v4 + shadcn/ui). Use these as screen specs, screenshot them into Figma, or print this page to PDF.</p>
+  <div class="legend">
+    <span class="chip">Primary · violet-600 #7c3aed</span>
+    <span class="chip">Gradient → indigo-600 #4f46e5</span>
+    <span class="chip">Radius 14px cards · 999px pills</span>
+    <span class="chip">Geist / system sans</span>
+    <span class="chip">lucide icons</span>
+  </div>
+  <div class="swatches">
+    <div class="sw" style="background:#f5f3ff" title="violet-50"></div>
+    <div class="sw" style="background:#ddd6fe" title="violet-200"></div>
+    <div class="sw" style="background:#8b5cf6" title="violet-500"></div>
+    <div class="sw" style="background:#7c3aed" title="violet-600"></div>
+    <div class="sw" style="background:#4f46e5" title="indigo-600"></div>
+    <div class="sw" style="background:#171717" title="foreground"></div>
+    <div class="sw" style="background:#737373" title="muted"></div>
+    <div class="sw" style="background:#f4f4f6" title="page"></div>
+  </div>
+  <p class="print-tip">Tip: Press <b>Ctrl/Cmd + P</b> → “Save as PDF” to export this whole flow as a shareable design doc.</p>
+</div>
+
+<!-- ============================ ONBOARDING & AUTH ============================ -->
+<div class="section-title">Onboarding &amp; Auth</div>
+<div class="section-sub">Welcome / value prop, sign in, and role-based sign up (job seeker vs employer).</div>
+<div class="grid">
+
+  <!-- Welcome -->
+  <div class="screen">
+    <div class="cap">Welcome / Splash<small>App entry · value proposition</small></div>
+    <div class="phone"><div class="notch"></div><div class="scr">
+      <div class="statusbar on-violet"><span>9:41</span><span class="dots"><svg viewBox="0 0 24 24" width="16" height="12" fill="currentColor"><rect x="2" y="9" width="3" height="6" rx="1"/><rect x="7" y="6" width="3" height="9" rx="1"/><rect x="12" y="3" width="3" height="12" rx="1"/></svg><svg viewBox="0 0 24 24" width="18" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="16" height="11" rx="3"/><path d="M21 10v3"/></svg></span></div>
+      <div class="hero">
+        <div style="padding:14px 16px 0;display:flex;justify-content:center;">
+          <div class="brand"><div class="mark"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div><div class="name">404 Jobs</div></div>
+        </div>
+        <div class="grad-card">
+          <span class="hero-badge"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4"/><path d="m6.3 6.3 2.1 2.1M15.6 15.6l2.1 2.1M17.7 6.3l-2.1 2.1M8.4 15.6l-2.1 2.1"/></svg> The smarter way to get hired</span>
+          <h2>Find your next <span class="grad">opportunity</span>, faster.</h2>
+          <p>Browse thousands of roles, apply in a tap, and track every application — all in one place.</p>
+          <div class="stats4">
+            <div class="stat"><b>10k+</b><small>Active jobs</small></div>
+            <div class="stat"><b>5k+</b><small>Companies</small></div>
+            <div class="stat"><b>50k+</b><small>Seekers</small></div>
+          </div>
+        </div>
+        <div style="padding:0 16px 22px;">
+          <button class="btn primary full" style="margin-bottom:9px;">Get started — it's free <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></button>
+          <button class="btn outline full">I already have an account</button>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- Login -->
+  <div class="screen">
+    <div class="cap">Log in<small>Email + password</small></div>
+    <div class="phone"><div class="notch"></div><div class="scr">
+      <div class="statusbar"><span>9:41</span><span class="dots"><svg viewBox="0 0 24 24" width="16" height="12" fill="currentColor"><rect x="2" y="9" width="3" height="6" rx="1"/><rect x="7" y="6" width="3" height="9" rx="1"/><rect x="12" y="3" width="3" height="12" rx="1"/></svg><svg viewBox="0 0 24 24" width="18" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="16" height="11" rx="3"/><path d="M21 10v3"/></svg></span></div>
+      <div class="appbar"><div class="iconbtn ghost"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></div></div>
+      <div class="body" style="padding:0 22px;">
+        <div style="display:flex;justify-content:center;margin:6px 0 18px;">
+          <div class="brand"><div class="mark"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div><div class="name">404 Jobs</div></div>
+        </div>
+        <h2 style="font-size:22px;font-weight:800;text-align:center;">Welcome back</h2>
+        <p style="text-align:center;color:var(--muted);font-size:12.5px;margin:6px 0 22px;">Log in to continue your search</p>
+        <div class="field"><label>Email</label><div class="input ph">you@example.com</div></div>
+        <div class="field"><label>Password</label><div class="input ph" style="display:flex;justify-content:space-between;align-items:center;">••••••••<span style="color:var(--violet-500)"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></span></div></div>
+        <div style="text-align:right;font-size:11.5px;color:var(--violet-600);font-weight:600;margin:-4px 0 16px;">Forgot password?</div>
+        <button class="btn primary full">Log in</button>
+        <div class="form-foot">Don't have an account? <a>Register</a></div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- Register / role -->
+  <div class="screen">
+    <div class="cap">Sign up — choose role<small>Job seeker or employer</small></div>
+    <div class="phone"><div class="notch"></div><div class="scr">
+      <div class="statusbar"><span>9:41</span><span class="dots"><svg viewBox="0 0 24 24" width="16" height="12" fill="currentColor"><rect x="2" y="9" width="3" height="6" rx="1"/><rect x="7" y="6" width="3" height="9" rx="1"/><rect x="12" y="3" width="3" height="12" rx="1"/></svg><svg viewBox="0 0 24 24" width="18" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="16" height="11" rx="3"/><path d="M21 10v3"/></svg></span></div>
+      <div class="appbar"><div class="iconbtn ghost"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></div><div class="title" style="font-size:16px;">Create account</div></div>
+      <div class="body scroll" style="padding:0 18px;">
+        <p style="color:var(--muted);font-size:12.5px;margin-bottom:14px;">How do you want to use 404 Jobs?</p>
+        <div class="role sel" style="margin-bottom:11px;">
+          <div class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          <div><h4>I'm a job seeker</h4><p>Browse roles, apply in a tap, and track applications.</p></div>
+          <div class="radio"></div>
+        </div>
+        <div class="role">
+          <div class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4M8 6h.01M16 6h.01M8 10h.01M16 10h.01M8 14h.01M16 14h.01"/></svg></div>
+          <div><h4>I'm an employer</h4><p>Post jobs and review applicants in one pipeline.</p></div>
+          <div class="radio"></div>
+        </div>
+        <div class="sep" style="margin:16px 0;"></div>
+        <div class="field"><label>Full name</label><div class="input ph">Juan dela Cruz</div></div>
+        <div class="field"><label>Email</label><div class="input ph">you@example.com</div></div>
+        <div class="field"><label>Password</label><div class="input ph">••••••••</div></div>
+        <button class="btn primary full">Create account <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></button>
+        <div class="form-foot">Already registered? <a>Log in</a></div>
+      </div>
+    </div></div>
+  </div>
+
+</div>
+
+<!-- ============================ JOB SEEKER ============================ -->
+<div class="section-title">Job Seeker</div>
+<div class="section-sub">Bottom tabs: Jobs · Applications · Saved · Profile. Browse → details → apply, then track status.</div>
+<div class="grid">
+
+  <!-- Browse jobs -->
+  <div class="screen">
+    <div class="cap">Browse Jobs<small>Search · filters · feed</small></div>
+    <div class="phone"><div class="notch"></div><div class="scr">
+      <div class="statusbar"><span>9:41</span><span class="dots"><svg viewBox="0 0 24 24" width="16" height="12" fill="currentColor"><rect x="2" y="9" width="3" height="6" rx="1"/><rect x="7" y="6" width="3" height="9" rx="1"/><rect x="12" y="3" width="3" height="12" rx="1"/></svg><svg viewBox="0 0 24 24" width="18" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="16" height="11" rx="3"/><path d="M21 10v3"/></svg></span></div>
+      <div class="appbar">
+        <div class="brand"><div class="mark" style="width:26px;height:26px;border-radius:8px;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div><div class="name" style="font-size:15px;">404 Jobs</div></div>
+        <div class="spacer"></div>
+        <div class="iconbtn ghost"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="dot"></span></div>
+      </div>
+      <div class="body scroll">
+        <div class="search"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg> Search job title or company</div>
+        <div class="filters">
+          <span class="pill active">All</span>
+          <span class="pill">Remote</span>
+          <span class="pill">Full-time</span>
+          <span class="pill">Hybrid</span>
+        </div>
+        
+  <div class="card">
+    <div class="job-top">
+      <div class="logo">Ac</div>
+      <div style="flex:1;"><div class="job-title">Senior Frontend Engineer</div><div class="job-co">Acme Technologies Inc.</div></div>
+      <div class="iconbtn ghost" style="color:var(--violet-500);"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z"/></svg></div>
+    </div>
+    <div class="meta">
+      <span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> Makati</span>
+      <span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V4h7a5 5 0 0 1 0 10H4M3 9h12M3 13h9"/></svg> ₱80k–₱120k</span>
+      <span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> 2d ago</span>
+    </div>
+    <div class="tags">
+      <span class="badge">Full-time</span>
+      <span class="badge green">Remote</span>
+      <button class="btn outline sm" style="margin-left:auto;">View</button>
+      <button class="btn primary sm">Apply</button>
+    </div>
+  </div>
+        
+  <div class="card">
+    <div class="job-top">
+      <div class="logo">Nv</div>
+      <div style="flex:1;"><div class="job-title">Product Designer</div><div class="job-co">Novatek Studios</div></div>
+      <div class="iconbtn ghost" style="color:var(--violet-500);"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z"/></svg></div>
+    </div>
+    <div class="meta">
+      <span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> BGC, Taguig</span>
+      <span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V4h7a5 5 0 0 1 0 10H4M3 9h12M3 13h9"/></svg> ₱60k–₱90k</span>
+      <span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> 5d ago</span>
+    </div>
+    <div class="tags">
+      <span class="badge">Full-time</span>
+      <span class="badge blue">Hybrid</span>
+      <button class="btn outline sm" style="margin-left:auto;">View</button>
+      <button class="btn primary sm">Apply</button>
+    </div>
+  </div>
+        
+  <div class="card">
+    <div class="job-top">
+      <div class="logo">Bl</div>
+      <div style="flex:1;"><div class="job-title">Mobile Developer (RN)</div><div class="job-co">Bluewave Apps</div></div>
+      <div class="iconbtn ghost" style="color:var(--violet-500);"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z"/></svg></div>
+    </div>
+    <div class="meta">
+      <span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> Remote, PH</span>
+      <span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V4h7a5 5 0 0 1 0 10H4M3 9h12M3 13h9"/></svg> ₱70k–₱110k</span>
+      <span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> 1w ago</span>
+    </div>
+    <div class="tags">
+      <span class="badge">Contract</span>
+      <span class="badge green">Remote</span>
+      <button class="btn outline sm" style="margin-left:auto;">View</button>
+      <button class="btn outline sm">Applied</button>
+    </div>
+  </div>
+      </div>
+      <div class="tabbar"><div class="tab active"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><span>Jobs</span></div><div class="tab"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg><span>Applied</span></div><div class="tab"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z"/></svg><span>Saved</span></div><div class="tab"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Profile</span></div></div>
+    </div></div>
+  </div>
+
+  <!-- Job details -->
+  <div class="screen">
+    <div class="cap">Job Details<small>Full posting + sticky apply</small></div>
+    <div class="phone"><div class="notch"></div><div class="scr">
+      <div class="statusbar on-violet"><span>9:41</span><span class="dots"><svg viewBox="0 0 24 24" width="16" height="12" fill="currentColor"><rect x="2" y="9" width="3" height="6" rx="1"/><rect x="7" y="6" width="3" height="9" rx="1"/><rect x="12" y="3" width="3" height="12" rx="1"/></svg><svg viewBox="0 0 24 24" width="18" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="16" height="11" rx="3"/><path d="M21 10v3"/></svg></span></div>
+      <div class="detail-head">
+        <div style="display:flex;justify-content:space-between;">
+          <div class="iconbtn" style="color:#fff;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></div>
+          <div class="iconbtn" style="color:#fff;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z"/></svg></div>
+        </div>
+        <div class="job-top" style="margin-top:6px;">
+          <div class="logo">Ac</div>
+          <div style="flex:1;">
+            <div class="job-title">Senior Frontend Engineer</div>
+            <div class="job-co">Acme Technologies Inc.</div>
+          </div>
+        </div>
+        <div class="meta">
+          <span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> Makati, Metro Manila</span>
+          <span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V4h7a5 5 0 0 1 0 10H4M3 9h12M3 13h9"/></svg> ₱80k – ₱120k</span>
+          <span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Posted 2d ago</span>
+        </div>
+        <div class="tags" style="border:none;padding-top:11px;">
+          <span class="badge" style="background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3);color:#fff;">Full-time</span>
+          <span class="badge green">Remote</span>
+        </div>
+      </div>
+      <div class="body scroll" style="padding-top:14px;">
+        <div class="sec-h">About the role</div>
+        <p class="para">We're looking for a senior engineer to own our design system and lead the front-end architecture across web and mobile.</p>
+        <div class="sec-h">Responsibilities</div>
+        <div class="ul">
+          <span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Build and maintain reusable UI components</span>
+          <span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Partner with design on the mobile experience</span>
+          <span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Mentor mid-level engineers</span>
+        </div>
+        <div class="sec-h">Requirements</div>
+        <div class="ul">
+          <span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> 5+ years with React / React Native</span>
+          <span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Strong TypeScript fundamentals</span>
+        </div>
+        <div style="height:8px;"></div>
+      </div>
+      <div class="sticky-cta">
+        <button class="btn outline" style="flex:0 0 auto;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z"/></svg></button>
+        <button class="btn primary full">Apply now</button>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- Apply bottom sheet -->
+  <div class="screen">
+    <div class="cap">Apply (bottom sheet)<small>Pick a resume → submit</small></div>
+    <div class="phone"><div class="notch"></div><div class="scr">
+      <div class="statusbar"><span>9:41</span><span class="dots"><svg viewBox="0 0 24 24" width="16" height="12" fill="currentColor"><rect x="2" y="9" width="3" height="6" rx="1"/><rect x="7" y="6" width="3" height="9" rx="1"/><rect x="12" y="3" width="3" height="12" rx="1"/></svg><svg viewBox="0 0 24 24" width="18" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="16" height="11" rx="3"/><path d="M21 10v3"/></svg></span></div>
+      <div class="appbar"><div class="iconbtn ghost"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></div><div class="title" style="font-size:16px;">Senior Frontend Engineer</div></div>
+      <div class="sheet-screen">
+        <div class="sheet">
+          <div class="handle"></div>
+          <h3 style="font-size:16px;font-weight:700;">Apply to Acme Technologies</h3>
+          <p style="font-size:12px;color:var(--muted);margin:5px 0 16px;">Choose the resume to send with your application.</p>
+          <div class="resume-opt sel">
+            <div class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg></div>
+            <div style="flex:1;"><div style="font-size:13px;font-weight:600;">Juan_DelaCruz_CV.pdf</div><div style="font-size:11px;color:var(--muted);">Uploaded May 2026 · 240 KB</div></div>
+            <div class="radio" style="border-color:var(--violet-600);"><div style="width:10px;height:10px;border-radius:50%;background:var(--violet-600);"></div></div>
+          </div>
+          <div class="resume-opt">
+            <div class="ic" style="background:var(--violet-50);color:var(--violet-600);"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></div>
+            <div style="flex:1;"><div style="font-size:13px;font-weight:600;">Upload a new resume</div><div style="font-size:11px;color:var(--muted);">PDF up to 5 MB</div></div>
+          </div>
+          <div class="field" style="margin:16px 0 0;"><label>Cover note (optional)</label><div class="input ph" style="height:64px;">Add a short note to the employer…</div></div>
+          <button class="btn primary full" style="margin-top:16px;">Submit application</button>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- My applications -->
+  <div class="screen">
+    <div class="cap">My Applications<small>Status tracking</small></div>
+    <div class="phone"><div class="notch"></div><div class="scr">
+      <div class="statusbar"><span>9:41</span><span class="dots"><svg viewBox="0 0 24 24" width="16" height="12" fill="currentColor"><rect x="2" y="9" width="3" height="6" rx="1"/><rect x="7" y="6" width="3" height="9" rx="1"/><rect x="12" y="3" width="3" height="12" rx="1"/></svg><svg viewBox="0 0 24 24" width="18" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="16" height="11" rx="3"/><path d="M21 10v3"/></svg></span></div>
+      <div class="appbar"><div class="title">My Applications</div><div class="spacer"></div><div class="iconbtn ghost"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></div></div>
+      <div class="body scroll">
+        <div class="filters" style="margin-top:0;">
+          <span class="pill active">All</span>
+          <span class="pill">Pending</span>
+          <span class="pill">Viewed</span>
+          <span class="pill">Accepted</span>
+        </div>
+        
+  <div class="card">
+    <div class="job-top">
+      <div class="logo">Ac</div>
+      <div style="flex:1;">
+        <div class="job-title">Senior Frontend Engineer</div>
+        <div class="job-co">Acme Technologies Inc.</div>
+        <div class="meta" style="margin-top:6px;"><span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Applied 3d ago</span></div>
+      </div>
+      <span class="badge amber"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Pending</span>
+    </div>
+    <div class="btn-row"><button class="btn primary sm">View application</button></div>
+  </div>
+        
+  <div class="card">
+    <div class="job-top">
+      <div class="logo">Nv</div>
+      <div style="flex:1;">
+        <div class="job-title">Product Designer</div>
+        <div class="job-co">Novatek Studios</div>
+        <div class="meta" style="margin-top:6px;"><span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Applied 5d ago</span></div>
+      </div>
+      <span class="badge blue"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg> Viewed</span>
+    </div>
+    <div class="btn-row"><button class="btn primary sm">View application</button></div>
+  </div>
+        
+  <div class="card">
+    <div class="job-top">
+      <div class="logo">Bl</div>
+      <div style="flex:1;">
+        <div class="job-title">Mobile Developer</div>
+        <div class="job-co">Bluewave Apps</div>
+        <div class="meta" style="margin-top:6px;"><span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Applied 1w ago</span></div>
+      </div>
+      <span class="badge green"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m16 11 2 2 4-4"/></svg> Shortlisted</span>
+    </div>
+    <div class="btn-row"><button class="btn primary sm">View application</button></div>
+  </div>
+        
+  <div class="card">
+    <div class="job-top">
+      <div class="logo">Sk</div>
+      <div style="flex:1;">
+        <div class="job-title">UI Engineer</div>
+        <div class="job-co">Skylark Labs</div>
+        <div class="meta" style="margin-top:6px;"><span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Applied 2w ago</span></div>
+      </div>
+      <span class="badge emerald"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Accepted</span>
+    </div>
+    <div class="btn-row"><button class="btn primary sm">View application</button></div>
+  </div>
+        
+  <div class="card">
+    <div class="job-top">
+      <div class="logo">Or</div>
+      <div style="flex:1;">
+        <div class="job-title">Web Developer</div>
+        <div class="job-co">Orbit Co.</div>
+        <div class="meta" style="margin-top:6px;"><span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Applied 3w ago</span></div>
+      </div>
+      <span class="badge rose"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg> Rejected</span>
+    </div>
+    <div class="btn-row"><button class="btn primary sm">View application</button></div>
+  </div>
+      </div>
+      <div class="tabbar"><div class="tab"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><span>Jobs</span></div><div class="tab active"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg><span>Applied</span></div><div class="tab"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z"/></svg><span>Saved</span></div><div class="tab"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Profile</span></div></div>
+    </div></div>
+  </div>
+
+  <!-- Application detail -->
+  <div class="screen">
+    <div class="cap">Application Detail<small>Timeline + status</small></div>
+    <div class="phone"><div class="notch"></div><div class="scr">
+      <div class="statusbar"><span>9:41</span><span class="dots"><svg viewBox="0 0 24 24" width="16" height="12" fill="currentColor"><rect x="2" y="9" width="3" height="6" rx="1"/><rect x="7" y="6" width="3" height="9" rx="1"/><rect x="12" y="3" width="3" height="12" rx="1"/></svg><svg viewBox="0 0 24 24" width="18" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="16" height="11" rx="3"/><path d="M21 10v3"/></svg></span></div>
+      <div class="appbar"><div class="iconbtn ghost"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></div><div class="title" style="font-size:16px;">Application</div></div>
+      <div class="body scroll">
+        <div class="card">
+          <div class="job-top">
+            <div class="logo">Ac</div>
+            <div style="flex:1;"><div class="job-title">Senior Frontend Engineer</div><div class="job-co">Acme Technologies Inc.</div></div>
+          </div>
+          <div class="tags"><span class="badge blue"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg> Viewed</span><span style="font-size:11px;color:var(--muted);margin-left:auto;">Applied 3d ago</span></div>
+        </div>
+        <div class="sec-h">Status timeline</div>
+        <div class="card">
+          <div class="activity" style="padding-top:0;"><div class="ai" style="background:var(--emerald-50);color:var(--emerald-700);"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div><div><div class="at">Application submitted</div><div class="time">Jun 1, 2026 · 9:24 AM</div></div></div>
+          <div class="sep"></div>
+          <div class="activity"><div class="ai" style="background:var(--blue-50);color:var(--blue-700);"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></div><div><div class="at">Viewed by employer</div><div class="time">Jun 2, 2026 · 2:10 PM</div></div></div>
+          <div class="sep"></div>
+          <div class="activity" style="opacity:.5;"><div class="ai"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m16 11 2 2 4-4"/></svg></div><div><div class="at">Shortlist decision</div><div class="time">Pending</div></div></div>
+        </div>
+        <div class="sec-h">Resume sent</div>
+        <div class="card" style="display:flex;align-items:center;gap:11px;">
+          <div class="resume-opt sel" style="border:none;background:none;padding:0;flex:1;">
+            <div class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg></div>
+            <div><div style="font-size:13px;font-weight:600;">Juan_DelaCruz_CV.pdf</div><div style="font-size:11px;color:var(--muted);">240 KB</div></div>
+          </div>
+          <button class="btn outline sm">View</button>
+        </div>
+        <button class="btn outline full" style="margin-top:14px;color:var(--rose-700);border-color:var(--rose-200);"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-1"/></svg> Withdraw application</button>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- Saved jobs -->
+  <div class="screen">
+    <div class="cap">Saved Jobs<small>Bookmarked roles</small></div>
+    <div class="phone"><div class="notch"></div><div class="scr">
+      <div class="statusbar"><span>9:41</span><span class="dots"><svg viewBox="0 0 24 24" width="16" height="12" fill="currentColor"><rect x="2" y="9" width="3" height="6" rx="1"/><rect x="7" y="6" width="3" height="9" rx="1"/><rect x="12" y="3" width="3" height="12" rx="1"/></svg><svg viewBox="0 0 24 24" width="18" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="16" height="11" rx="3"/><path d="M21 10v3"/></svg></span></div>
+      <div class="appbar"><div class="title">Saved Jobs</div><div class="spacer"></div><span class="badge">12 saved</span></div>
+      <div class="body scroll">
+        
+  <div class="card">
+    <div class="job-top">
+      <div class="logo">Ac</div>
+      <div style="flex:1;"><div class="job-title">Senior Frontend Engineer</div><div class="job-co">Acme Technologies Inc.</div></div>
+      <div class="iconbtn ghost" style="color:var(--violet-500);"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z"/></svg></div>
+    </div>
+    <div class="meta">
+      <span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> Makati</span>
+      <span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V4h7a5 5 0 0 1 0 10H4M3 9h12M3 13h9"/></svg> ₱80k–₱120k</span>
+      <span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> 2d ago</span>
+    </div>
+    <div class="tags">
+      <span class="badge">Full-time</span>
+      <span class="badge green">Remote</span>
+      <button class="btn outline sm" style="margin-left:auto;">View</button>
+      <button class="btn primary sm">Apply</button>
+    </div>
+  </div>
+        
+  <div class="card">
+    <div class="job-top">
+      <div class="logo">Nv</div>
+      <div style="flex:1;"><div class="job-title">Product Designer</div><div class="job-co">Novatek Studios</div></div>
+      <div class="iconbtn ghost" style="color:var(--violet-500);"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z"/></svg></div>
+    </div>
+    <div class="meta">
+      <span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> BGC, Taguig</span>
+      <span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V4h7a5 5 0 0 1 0 10H4M3 9h12M3 13h9"/></svg> ₱60k–₱90k</span>
+      <span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> 5d ago</span>
+    </div>
+    <div class="tags">
+      <span class="badge">Full-time</span>
+      <span class="badge blue">Hybrid</span>
+      <button class="btn outline sm" style="margin-left:auto;">View</button>
+      <button class="btn primary sm">Apply</button>
+    </div>
+  </div>
+      </div>
+      <div class="tabbar"><div class="tab"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><span>Jobs</span></div><div class="tab"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg><span>Applied</span></div><div class="tab active"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z"/></svg><span>Saved</span></div><div class="tab"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Profile</span></div></div>
+    </div></div>
+  </div>
+
+  <!-- Profile -->
+  <div class="screen">
+    <div class="cap">Profile (Job Seeker)<small>Account + settings</small></div>
+    <div class="phone"><div class="notch"></div><div class="scr">
+      <div class="statusbar"><span>9:41</span><span class="dots"><svg viewBox="0 0 24 24" width="16" height="12" fill="currentColor"><rect x="2" y="9" width="3" height="6" rx="1"/><rect x="7" y="6" width="3" height="9" rx="1"/><rect x="12" y="3" width="3" height="12" rx="1"/></svg><svg viewBox="0 0 24 24" width="18" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="16" height="11" rx="3"/><path d="M21 10v3"/></svg></span></div>
+      <div class="appbar"><div class="title">Profile</div><div class="spacer"></div><div class="iconbtn ghost"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg></div></div>
+      <div class="body scroll">
+        <div class="profile-head">
+          <div class="avatar">JD</div>
+          <h3>Juan dela Cruz</h3>
+          <p>Frontend Engineer · Makati</p>
+          <button class="btn outline sm" style="margin-top:10px;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg> Edit profile</button>
+        </div>
+        <div class="card" style="margin-top:6px;">
+          <div class="fieldrow"><span class="k">Email</span><span class="v">juan@example.com</span></div><div class="sep"></div>
+          <div class="fieldrow"><span class="k">Phone</span><span class="v">+63 917 000 0000</span></div><div class="sep"></div>
+          <div class="fieldrow"><span class="k">Resumes</span><span class="v">2 files</span></div>
+        </div>
+        <div class="card" style="padding:4px 12px;">
+          <div class="menu-item"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg> My resumes <span class="chev"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span></div><div class="sep"></div>
+          <div class="menu-item"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Change password <span class="chev"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span></div><div class="sep"></div>
+          <div class="menu-item"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg> Notifications <span class="chev"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span></div><div class="sep"></div>
+          <div class="menu-item danger"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg> Log out</div>
+        </div>
+      </div>
+      <div class="tabbar"><div class="tab"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><span>Jobs</span></div><div class="tab"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg><span>Applied</span></div><div class="tab"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z"/></svg><span>Saved</span></div><div class="tab active"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Profile</span></div></div>
+    </div></div>
+  </div>
+
+</div>
+
+<!-- ============================ EMPLOYER ============================ -->
+<div class="section-title">Employer</div>
+<div class="section-sub">Bottom tabs: Dashboard · Jobs · Applicants · Profile. Post jobs, review applicants, track activity.</div>
+<div class="grid">
+
+  <!-- Employer dashboard -->
+  <div class="screen">
+    <div class="cap">Employer Dashboard<small>Stats + recent activity</small></div>
+    <div class="phone"><div class="notch"></div><div class="scr">
+      <div class="statusbar"><span>9:41</span><span class="dots"><svg viewBox="0 0 24 24" width="16" height="12" fill="currentColor"><rect x="2" y="9" width="3" height="6" rx="1"/><rect x="7" y="6" width="3" height="9" rx="1"/><rect x="12" y="3" width="3" height="12" rx="1"/></svg><svg viewBox="0 0 24 24" width="18" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="16" height="11" rx="3"/><path d="M21 10v3"/></svg></span></div>
+      <div class="appbar"><div><div class="title">Dashboard</div><div class="sub">Welcome back, Acme</div></div><div class="spacer"></div><div class="iconbtn ghost"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="dot"></span></div></div>
+      <div class="body scroll">
+        <div class="stat2">
+          <div class="stat-card"><div><div class="lbl">Active jobs</div><div class="val">8</div></div><div class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div></div>
+          <div class="stat-card"><div><div class="lbl">Applicants</div><div class="val">142</div></div><div class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div></div>
+          <div class="stat-card"><div><div class="lbl">Shortlisted</div><div class="val">19</div></div><div class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m16 11 2 2 4-4"/></svg></div></div>
+          <div class="stat-card"><div><div class="lbl">Hired</div><div class="val">4</div></div><div class="ic"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div></div>
+        </div>
+        <div class="sec-h">Recent activity</div>
+        <div class="card" style="padding:4px 12px;">
+          <div class="activity"><div class="ai"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div><div class="at">New application received</div><div class="ad">Maria Santos · Senior Frontend Engineer</div><div class="time">12 min ago</div></div></div>
+          <div class="sep"></div>
+          <div class="activity"><div class="ai" style="background:var(--blue-50);color:var(--blue-700);"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></div><div><div class="at">Job listing viewed 24 times</div><div class="ad">Product Designer</div><div class="time">1h ago</div></div></div>
+          <div class="sep"></div>
+          <div class="activity"><div class="ai" style="background:var(--emerald-50);color:var(--emerald-700);"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div><div><div class="at">Candidate hired</div><div class="ad">Jose Reyes · Backend Engineer</div><div class="time">Yesterday</div></div></div>
+        </div>
+      </div>
+      <div class="tabbar"><div class="tab active"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg><span>Dashboard</span></div><div class="tab"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><span>Jobs</span></div><div class="tab"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Applicants</span></div><div class="tab"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Profile</span></div></div>
+    </div></div>
+  </div>
+
+  <!-- Job listings (employer) -->
+  <div class="screen">
+    <div class="cap">My Job Listings<small>Manage posts · FAB to create</small></div>
+    <div class="phone"><div class="notch"></div><div class="scr">
+      <div class="statusbar"><span>9:41</span><span class="dots"><svg viewBox="0 0 24 24" width="16" height="12" fill="currentColor"><rect x="2" y="9" width="3" height="6" rx="1"/><rect x="7" y="6" width="3" height="9" rx="1"/><rect x="12" y="3" width="3" height="12" rx="1"/></svg><svg viewBox="0 0 24 24" width="18" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="16" height="11" rx="3"/><path d="M21 10v3"/></svg></span></div>
+      <div class="appbar"><div class="title">Job Listings</div><div class="spacer"></div><div class="iconbtn ghost"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></div></div>
+      <div class="body scroll">
+        <div class="seg"><button class="active">Active</button><button>Closed</button><button>Drafts</button></div>
+        <div class="card">
+          <div class="job-top"><div class="logo">Ac</div><div style="flex:1;"><div class="job-title">Senior Frontend Engineer</div><div class="job-co">42 applicants · 8 new</div></div><div class="iconbtn ghost"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></div></div>
+          <div class="meta"><span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V4h7a5 5 0 0 1 0 10H4M3 9h12M3 13h9"/></svg> ₱80k–₱120k</span><span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> 2d ago</span></div>
+          <div class="tags"><span class="badge green">Active</span><span class="badge">Full-time</span><button class="btn outline sm" style="margin-left:auto;">View applicants</button></div>
+        </div>
+        <div class="card">
+          <div class="job-top"><div class="logo">Ac</div><div style="flex:1;"><div class="job-title">Product Designer</div><div class="job-co">31 applicants · 2 new</div></div><div class="iconbtn ghost"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></div></div>
+          <div class="meta"><span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V4h7a5 5 0 0 1 0 10H4M3 9h12M3 13h9"/></svg> ₱60k–₱90k</span><span><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> 5d ago</span></div>
+          <div class="tags"><span class="badge green">Active</span><span class="badge blue">Hybrid</span><button class="btn outline sm" style="margin-left:auto;">View applicants</button></div>
+        </div>
+      </div>
+      <div class="fab"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></div>
+      <div class="tabbar"><div class="tab"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg><span>Dashboard</span></div><div class="tab active"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><span>Jobs</span></div><div class="tab"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Applicants</span></div><div class="tab"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Profile</span></div></div>
+    </div></div>
+  </div>
+
+  <!-- Create job -->
+  <div class="screen">
+    <div class="cap">Create / Edit Job<small>Form with rich description</small></div>
+    <div class="phone"><div class="notch"></div><div class="scr">
+      <div class="statusbar"><span>9:41</span><span class="dots"><svg viewBox="0 0 24 24" width="16" height="12" fill="currentColor"><rect x="2" y="9" width="3" height="6" rx="1"/><rect x="7" y="6" width="3" height="9" rx="1"/><rect x="12" y="3" width="3" height="12" rx="1"/></svg><svg viewBox="0 0 24 24" width="18" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="16" height="11" rx="3"/><path d="M21 10v3"/></svg></span></div>
+      <div class="appbar"><div class="iconbtn ghost"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></div><div class="title" style="font-size:16px;">Post a job</div></div>
+      <div class="body scroll">
+        <div class="field"><label>Job title</label><div class="input ph">e.g. Senior Frontend Engineer</div></div>
+        <div class="field" style="display:flex;gap:10px;">
+          <div style="flex:1;"><label>Job type</label><div class="input" style="display:flex;justify-content:space-between;">Full-time <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></div></div>
+          <div style="flex:1;"><label>Work setup</label><div class="input" style="display:flex;justify-content:space-between;">Remote <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></div></div>
+        </div>
+        <div class="field"><label>Location</label><div class="input ph">Makati, Metro Manila</div></div>
+        <div class="field" style="display:flex;gap:10px;">
+          <div style="flex:1;"><label>Min salary</label><div class="input ph">₱ 80,000</div></div>
+          <div style="flex:1;"><label>Max salary</label><div class="input ph">₱ 120,000</div></div>
+        </div>
+        <div class="field"><label>Description</label>
+          <div class="input" style="height:auto;padding:0;">
+            <div style="display:flex;gap:4px;padding:8px;border-bottom:1px solid var(--border-2);color:var(--gray-600);font-size:12px;font-weight:700;">B <span style="font-style:italic;">I</span> <span style="text-decoration:underline;">U</span> <span style="margin-left:auto;color:var(--muted);">⌶ • —</span></div>
+            <div style="padding:11px 12px;color:var(--muted);font-size:12.5px;height:80px;">Describe the role, responsibilities, and requirements…</div>
+          </div>
+        </div>
+        <div class="btn-row" style="border:none;">
+          <button class="btn outline">Save draft</button>
+          <button class="btn primary">Publish job</button>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- Applicants list -->
+  <div class="screen">
+    <div class="cap">Applicants<small>Per-job candidate list</small></div>
+    <div class="phone"><div class="notch"></div><div class="scr">
+      <div class="statusbar"><span>9:41</span><span class="dots"><svg viewBox="0 0 24 24" width="16" height="12" fill="currentColor"><rect x="2" y="9" width="3" height="6" rx="1"/><rect x="7" y="6" width="3" height="9" rx="1"/><rect x="12" y="3" width="3" height="12" rx="1"/></svg><svg viewBox="0 0 24 24" width="18" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="16" height="11" rx="3"/><path d="M21 10v3"/></svg></span></div>
+      <div class="appbar"><div class="iconbtn ghost"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></div><div><div class="title" style="font-size:16px;">Applicants</div><div class="sub">Senior Frontend Engineer · 42</div></div></div>
+      <div class="body scroll">
+        <div class="filters" style="margin-top:0;">
+          <span class="pill active">All</span><span class="pill">New</span><span class="pill">Shortlisted</span><span class="pill">Rejected</span>
+        </div>
+        <div class="card"><div class="applicant"><div class="av">MS</div><div style="flex:1;"><div style="font-size:13.5px;font-weight:700;">Maria Santos</div><div style="font-size:11.5px;color:var(--muted);">5y exp · Applied 12m ago</div></div><span class="badge amber"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Pending</span></div></div>
+        <div class="card"><div class="applicant"><div class="av" style="background:var(--violet-600);">JR</div><div style="flex:1;"><div style="font-size:13.5px;font-weight:700;">Jose Reyes</div><div style="font-size:11.5px;color:var(--muted);">7y exp · Applied 2h ago</div></div><span class="badge green"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m16 11 2 2 4-4"/></svg> Shortlisted</span></div></div>
+        <div class="card"><div class="applicant"><div class="av" style="background:#0ea5e9;">AL</div><div style="flex:1;"><div style="font-size:13.5px;font-weight:700;">Ana Lim</div><div style="font-size:11.5px;color:var(--muted);">3y exp · Applied 1d ago</div></div><span class="badge blue"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg> Viewed</span></div></div>
+        <div class="card"><div class="applicant"><div class="av" style="background:#64748b;">RT</div><div style="flex:1;"><div style="font-size:13.5px;font-weight:700;">Rico Tan</div><div style="font-size:11.5px;color:var(--muted);">2y exp · Applied 2d ago</div></div><span class="badge rose"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg> Rejected</span></div></div>
+      </div>
+      <div class="tabbar"><div class="tab"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg><span>Dashboard</span></div><div class="tab"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><span>Jobs</span></div><div class="tab active"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Applicants</span></div><div class="tab"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Profile</span></div></div>
+    </div></div>
+  </div>
+
+  <!-- View application (employer) -->
+  <div class="screen">
+    <div class="cap">View Application<small>Candidate + decision actions</small></div>
+    <div class="phone"><div class="notch"></div><div class="scr">
+      <div class="statusbar"><span>9:41</span><span class="dots"><svg viewBox="0 0 24 24" width="16" height="12" fill="currentColor"><rect x="2" y="9" width="3" height="6" rx="1"/><rect x="7" y="6" width="3" height="9" rx="1"/><rect x="12" y="3" width="3" height="12" rx="1"/></svg><svg viewBox="0 0 24 24" width="18" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="16" height="11" rx="3"/><path d="M21 10v3"/></svg></span></div>
+      <div class="appbar"><div class="iconbtn ghost"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></div><div class="title" style="font-size:16px;">Application</div></div>
+      <div class="body scroll">
+        <div class="profile-head" style="padding-top:4px;">
+          <div class="avatar" style="background:var(--indigo-600);color:#fff;">MS</div>
+          <h3>Maria Santos</h3>
+          <p>Senior Frontend Engineer · 5 yrs exp</p>
+          <span class="badge amber" style="margin-top:8px;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Pending review</span>
+        </div>
+        <div class="card">
+          <div class="fieldrow"><span class="k">Email</span><span class="v">maria@example.com</span></div><div class="sep"></div>
+          <div class="fieldrow"><span class="k">Phone</span><span class="v">+63 917 222 3333</span></div><div class="sep"></div>
+          <div class="fieldrow"><span class="k">Applied</span><span class="v">12 minutes ago</span></div>
+        </div>
+        <div class="sec-h">Cover note</div>
+        <p class="para card" style="padding:13px;">I've led design-system work for two B2B products and would love to bring that to your team…</p>
+        <div class="sec-h">Resume</div>
+        <div class="card" style="display:flex;align-items:center;gap:11px;">
+          <div class="ic" style="width:36px;height:36px;border-radius:9px;background:var(--rose-50);color:var(--rose-700);display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/></svg></div>
+          <div style="flex:1;"><div style="font-size:13px;font-weight:600;">Maria_Santos_CV.pdf</div><div style="font-size:11px;color:var(--muted);">312 KB</div></div>
+          <button class="btn outline sm">Open</button>
+        </div>
+      </div>
+      <div class="sticky-cta">
+        <button class="btn outline full" style="color:var(--rose-700);border-color:var(--rose-200);">Reject</button>
+        <button class="btn primary full">Shortlist <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m16 11 2 2 4-4"/></svg></button>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- Employer profile -->
+  <div class="screen">
+    <div class="cap">Company Profile<small>Employer account</small></div>
+    <div class="phone"><div class="notch"></div><div class="scr">
+      <div class="statusbar"><span>9:41</span><span class="dots"><svg viewBox="0 0 24 24" width="16" height="12" fill="currentColor"><rect x="2" y="9" width="3" height="6" rx="1"/><rect x="7" y="6" width="3" height="9" rx="1"/><rect x="12" y="3" width="3" height="12" rx="1"/></svg><svg viewBox="0 0 24 24" width="18" height="12" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="16" height="11" rx="3"/><path d="M21 10v3"/></svg></span></div>
+      <div class="appbar"><div class="title">Company</div><div class="spacer"></div><div class="iconbtn ghost"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg></div></div>
+      <div class="body scroll">
+        <div class="profile-head">
+          <div class="avatar">Ac</div>
+          <h3>Acme Technologies Inc.</h3>
+          <p>Information Technology · Makati</p>
+          <button class="btn outline sm" style="margin-top:10px;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg> Edit company</button>
+        </div>
+        <div class="card">
+          <div class="fieldrow"><span class="k">Website</span><span class="v">acme.tech</span></div><div class="sep"></div>
+          <div class="fieldrow"><span class="k">Company size</span><span class="v">51–200</span></div><div class="sep"></div>
+          <div class="fieldrow"><span class="k">Active jobs</span><span class="v">8</span></div>
+        </div>
+        <div class="card" style="padding:4px 12px;">
+          <div class="menu-item"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4M8 6h.01M16 6h.01M8 10h.01M16 10h.01M8 14h.01M16 14h.01"/></svg> Company details <span class="chev"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span></div><div class="sep"></div>
+          <div class="menu-item"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Change password <span class="chev"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span></div><div class="sep"></div>
+          <div class="menu-item"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg> Notifications <span class="chev"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span></div><div class="sep"></div>
+          <div class="menu-item danger"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg> Log out</div>
+        </div>
+      </div>
+      <div class="tabbar"><div class="tab"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg><span>Dashboard</span></div><div class="tab"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><span>Jobs</span></div><div class="tab"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Applicants</span></div><div class="tab active"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Profile</span></div></div>
+    </div></div>
+  </div>
+
+</div>
+
+<div style="height:60px;"></div>
+
+</body>
+</html>
